@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function ReviewDashboard({ campaignId }: { campaignId: string }) {
   const handleExport = async (type: 'csv' | 'pdf') => {
     // Directly hits the new export routes

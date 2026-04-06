@@ -26,21 +26,29 @@ const mockJobs = [
 
 export default function ShortlistView() {
   const [jobs, setJobs] = useState(mockJobs);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  const handleDecision = (id: number, decision: string) => {
-    // In real app, call API to save decision securely
+  const handleDecision = (id: number, decision: 'APPROVE' | 'REJECT') => {
+    setStatusMessage(
+      decision === 'APPROVE'
+        ? 'Application workflow started for the selected job.'
+        : 'Job removed from the shortlist.'
+    );
     setJobs(jobs.filter(j => j.id !== id));
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>Review Shortlisted Jobs</h2>
-        <span className="badge badge-good">{jobs.length} Pending Review</span>
-      </div>
-      
-      <div className="grid-2">
-        {jobs.map(job => (
+       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+         <h2>Review Shortlisted Jobs</h2>
+         <span className="badge badge-good">{jobs.length} Pending Review</span>
+       </div>
+       {statusMessage && (
+         <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{statusMessage}</p>
+       )}
+       
+       <div className="grid-2">
+         {jobs.map(job => (
           <div key={job.id} className="glass-card job-card">
             <div>
               <div className="job-header">
@@ -63,12 +71,12 @@ export default function ShortlistView() {
             </div>
             
             <div className="action-buttons">
-              <button className="btn btn-success" onClick={() => handleDecision(job.id, 'APPROVE')}>
-                Approve & Apply
-              </button>
-              <button className="btn btn-danger" onClick={() => handleDecision(job.id, 'REJECT')}>
-                Reject
-              </button>
+               <button className="btn btn-success" onClick={() => handleDecision(job.id, 'APPROVE')}>
+                 Approve & Apply
+               </button>
+               <button className="btn btn-danger" onClick={() => handleDecision(job.id, 'REJECT')}>
+                 Reject
+               </button>
             </div>
           </div>
         ))}

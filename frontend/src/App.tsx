@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CampaignSetup from './components/CampaignSetup';
 import ReviewDashboard from './components/ReviewDashboard';
 import LiveProgress from './components/LiveProgress';
