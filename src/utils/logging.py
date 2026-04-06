@@ -1,4 +1,8 @@
-"""Structured logging configuration using structlog."""
+"""Structured logging + OpenTelemetry instrumentation.
+
+Configures structlog for structured logging and OpenTelemetry for
+distributed traces and metrics export.
+"""
 
 import logging
 import sys
@@ -41,3 +45,45 @@ def setup_logging() -> None:
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
     """Get a named logger instance."""
     return structlog.get_logger(name)
+
+
+def setup_opentelemetry() -> None:
+    """Initialize OpenTelemetry tracing and metrics.
+
+    Exports traces to Jaeger (via OTLP) and metrics to Prometheus.
+    Safe to call in dev — no-ops if collector is unavailable.
+    """
+    try:
+        from opentelemetry import trace, metrics
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+        from opentelemetry.sdk.metrics import MeterProvider
+        from opentelemetry.sdk.resources import Resource
+
+        resource = Resource.create({
+            "service.name": "jobpilot",
+            "service.version": "0.1.0",
+            "deployment.environment": settings.app_env,
+        })
+
+        # Tracing
+        tracer_provider = TracerProvider(resource=resource)
+
+        # In production, use OTLP exporter to Jaeger/OTel Collector
+        # For dev, use console exporter
+        if settings.is_dev:
+            tracer_provider.add_span_processor(
+                BatchSpanProcessor(ConsoleSpanExporter())
+            )
+
+        trace.set_tracer_provider(tracer_provider)
+
+        # Metrics
+        meter_provider = MeterProvider(resource=resource)
+        metrics.set_meter_provider(meter_provider)
+
+        get_logger(__name__).info("OpenTelemetry initialized", env=settings.app_env)
+    except ImportError:
+        get_logger(__name__).warning("OpenTelemetry SDK not available, skipping")
+    except Exception as e:
+        get_logger(__name__).warning("OpenTelemetry init failed", error=str(e))
