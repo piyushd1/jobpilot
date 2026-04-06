@@ -49,7 +49,7 @@ app.include_router(manual_links.router)
 try:
     from src.api.websocket import router as ws_router  # noqa: E402
 
-    app.include_router(ws_router)
+    app.include_router(ws_router, prefix="/api/campaigns")
 except ImportError:
     pass
 
