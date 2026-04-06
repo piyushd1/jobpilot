@@ -12,7 +12,7 @@ Plus automatic gates for risk review and challenge review.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
@@ -70,7 +70,7 @@ class ApprovalTask(BaseModel):
     decision: ApprovalDecision | None = None
     decision_notes: str = ""
     per_item_decisions: dict[str, str] = Field(default_factory=dict)
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     decided_at: str | None = None
 
 
@@ -138,7 +138,7 @@ class ApprovalService:
         task.decision_notes = notes
         task.per_item_decisions = per_item_decisions or {}
         task.status = "decided"
-        task.decided_at = datetime.now(timezone.utc).isoformat()
+        task.decided_at = datetime.now(UTC).isoformat()
 
         logger.info(
             "Approval decision submitted",
@@ -156,7 +156,8 @@ class ApprovalService:
     async def get_pending_tasks(self, campaign_id: str) -> list[ApprovalTask]:
         """Get all pending approval tasks for a campaign."""
         return [
-            t for t in self._tasks.values()
+            t
+            for t in self._tasks.values()
             if t.campaign_id == campaign_id and t.status == "pending"
         ]
 
@@ -172,8 +173,7 @@ class ApprovalService:
 
         if task.decision == ApprovalDecision.PARTIALLY_APPROVED:
             return [
-                item_id for item_id, dec in task.per_item_decisions.items()
-                if dec == "approved"
+                item_id for item_id, dec in task.per_item_decisions.items() if dec == "approved"
             ]
 
         return []

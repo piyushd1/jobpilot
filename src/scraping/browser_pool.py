@@ -4,12 +4,14 @@ Provides isolated Chromium contexts for rendering SPA-based career pages
 (Lever, Greenhouse, Workday). Enforces domain allowlist and auto-stops
 on challenge detection.
 """
+
 from __future__ import annotations
 
 import asyncio
 import random
 import re
-from dataclasses import dataclass, field
+from contextlib import suppress
+from dataclasses import dataclass
 from typing import Any
 
 from src.utils.logging import get_logger
@@ -17,16 +19,18 @@ from src.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
-class ChallengeDetected(Exception):
+class ChallengeDetectedError(Exception):
     """Raised when a login wall, CAPTCHA, or bot challenge is detected."""
+
     def __init__(self, domain: str, screenshot_path: str | None = None):
         self.domain = domain
         self.screenshot_path = screenshot_path
         super().__init__(f"Challenge detected on {domain}")
 
 
-class DomainNotAllowed(Exception):
+class DomainNotAllowedError(Exception):
     """Raised when attempting to browse a non-allowlisted domain."""
+
     def __init__(self, domain: str):
         self.domain = domain
         super().__init__(f"Domain not in allowlist: {domain}")
@@ -45,10 +49,19 @@ ALLOWED_DOMAIN_PATTERNS = [
 
 # Challenge detection patterns
 CHALLENGE_INDICATORS = [
-    "captcha", "recaptcha", "hcaptcha", "challenge",
-    "verify you are human", "please verify", "access denied",
-    "bot detection", "automated access", "unusual traffic",
-    "sign in to continue", "login required", "please log in",
+    "captcha",
+    "recaptcha",
+    "hcaptcha",
+    "challenge",
+    "verify you are human",
+    "please verify",
+    "access denied",
+    "bot detection",
+    "automated access",
+    "unusual traffic",
+    "sign in to continue",
+    "login required",
+    "please log in",
 ]
 
 USER_AGENTS = [
@@ -91,13 +104,11 @@ class PlaywrightBrowserPool:
 
     def is_domain_allowed(self, domain: str) -> bool:
         domain = domain.lower().strip()
-        for pattern in self._allowed_patterns:
-            if re.match(pattern, domain):
-                return True
-        return False
+        return any(re.match(pattern, domain) for pattern in self._allowed_patterns)
 
     async def start(self) -> None:
         from playwright.async_api import async_playwright
+
         self._playwright = await async_playwright().start()
         self._browser = await self._playwright.chromium.launch(headless=True)
         logger.info("Browser pool started", max_concurrent=self._max_concurrent)
@@ -112,7 +123,7 @@ class PlaywrightBrowserPool:
     async def get_context(self, domain: str) -> Any:
         """Create an isolated browser context for the given domain."""
         if not self.is_domain_allowed(domain):
-            raise DomainNotAllowed(domain)
+            raise DomainNotAllowedError(domain)
 
         if not self._browser:
             await self.start()
@@ -134,11 +145,12 @@ class PlaywrightBrowserPool:
         Returns: {"html": str, "api_responses": list, "screenshot": bytes | None}
         """
         from urllib.parse import urlparse
+
         if not domain:
             domain = urlparse(url).netloc
 
         if not self.is_domain_allowed(domain):
-            raise DomainNotAllowed(domain)
+            raise DomainNotAllowedError(domain)
 
         api_responses: list[dict] = []
 
@@ -172,9 +184,9 @@ class PlaywrightBrowserPool:
                 content_lower = content.lower()
                 for indicator in CHALLENGE_INDICATORS:
                     if indicator in content_lower:
-                        screenshot = await page.screenshot()
+                        await page.screenshot()
                         await context.close()
-                        raise ChallengeDetected(domain, screenshot_path=None)
+                        raise ChallengeDetectedError(domain, screenshot_path=None)
 
                 html = await page.content()
                 await context.close()
@@ -185,14 +197,12 @@ class PlaywrightBrowserPool:
                     "screenshot": None,
                 }
 
-            except ChallengeDetected:
+            except ChallengeDetectedError:
                 raise
             except Exception as e:
                 # Screenshot + close on any error
-                try:
-                    screenshot = await page.screenshot()
-                except Exception:
-                    screenshot = None
+                with suppress(Exception):
+                    await page.screenshot()
                 await context.close()
                 logger.error("Browser fetch failed", url=url, error=str(e))
                 raise

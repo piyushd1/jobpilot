@@ -29,6 +29,7 @@ logger = get_logger(__name__)
 # Input schema
 # ---------------------------------------------------------------------------
 
+
 class ResumeParserInput(BaseModel):
     """Input for the resume parser agent."""
 
@@ -98,6 +99,7 @@ Return the JSON object now.
 # ---------------------------------------------------------------------------
 # Agent
 # ---------------------------------------------------------------------------
+
 
 class ResumeParserAgent(AgentShell[ResumeParserInput, CandidateProfile]):
     """Parses a PDF resume into a structured CandidateProfile."""

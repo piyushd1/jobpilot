@@ -1,9 +1,12 @@
 """Task DAG engine for managing execution dependencies."""
+
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
-from src.models.enums import TaskType, TaskStatus
+
+from src.models.enums import TaskStatus, TaskType
+
 
 @dataclass
 class Task:
@@ -26,8 +29,10 @@ class Task:
     completed_at: datetime | None = None
     cost_tokens_used: int | None = None
 
+
 class TaskDAG:
     """Directed acyclic graph of tasks with dependency resolution."""
+
     def __init__(self):
         self._tasks: dict[str, Task] = {}
 

@@ -1,6 +1,7 @@
 """Temporal Workflow definition for JobPilot campaigns."""
+
 from __future__ import annotations
-import asyncio
+
 from datetime import timedelta
 from typing import Any
 
@@ -8,11 +9,10 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
-    from src.orchestration.dag import TaskDAG, Task
-    from src.orchestration.shared_context import SharedContext
-    from src.orchestration.planner import build_campaign_dag
     from src.orchestration.activities import execute_agent_activity
-    from src.models.enums import TaskStatus
+    from src.orchestration.dag import TaskDAG
+    from src.orchestration.planner import build_campaign_dag
+    from src.orchestration.shared_context import SharedContext
 
 
 @workflow.defn
@@ -76,8 +76,10 @@ class JobPilotWorkflow:
                 if self._dag.has_failed():
                     break
                 await workflow.wait_condition(
-                    lambda: bool(self._dag and self._dag.get_ready_tasks()) or
-                            (self._dag is not None and self._dag.all_terminal()),
+                    lambda: (
+                        bool(self._dag and self._dag.get_ready_tasks())
+                        or (self._dag is not None and self._dag.all_terminal())
+                    ),
                     timeout=timedelta(minutes=30),
                 )
                 continue

@@ -96,9 +96,7 @@ async def extract_pdf_text(pdf_bytes: bytes) -> dict:
             if len(combined_pb) >= _MIN_TEXT_THRESHOLD:
                 text = combined_pb
                 method = "pdfplumber"
-                pages_with_text = sum(
-                    1 for t in pages_text_pb if len(t.strip()) > 20
-                )
+                pages_with_text = sum(1 for t in pages_text_pb if len(t.strip()) > 20)
                 confidence = round(pages_with_text / max(page_count, 1), 2)
                 confidence = max(confidence, 0.4)
                 logger.info(

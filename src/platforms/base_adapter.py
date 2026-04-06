@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from src.models.enums import RetrievalStrategy
-from src.platforms.source_policy import SourcePolicy, SourcePolicyRegistry, source_registry
+from src.platforms.source_policy import SourcePolicyRegistry, source_registry
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -125,9 +125,7 @@ class PlatformAdapter(ABC):
                 result = await self._execute_strategy(strategy, params)
 
                 if result.status == "challenge_detected":
-                    logger.warning(
-                        f"[{self.platform_name}] Challenge detected on {strategy}"
-                    )
+                    logger.warning(f"[{self.platform_name}] Challenge detected on {strategy}")
                     # Do NOT bypass — log and move to next strategy
                     last_error = f"Challenge detected on {strategy}"
                     continue
@@ -156,9 +154,7 @@ class PlatformAdapter(ABC):
         )
 
     @abstractmethod
-    async def _execute_strategy(
-        self, strategy: str, params: SearchParams
-    ) -> StrategyResult:
+    async def _execute_strategy(self, strategy: str, params: SearchParams) -> StrategyResult:
         """Execute a specific retrieval strategy.
 
         Subclasses implement the actual logic for each strategy they support.

@@ -11,12 +11,10 @@ Run: locust -f tests/load/locustfile.py --host=http://localhost:8000
 
 from __future__ import annotations
 
-import json
 import random
 import uuid
 
 from locust import HttpUser, between, task
-
 
 SAMPLE_ROLES = [
     "Senior Software Engineer",
@@ -30,14 +28,34 @@ SAMPLE_ROLES = [
 ]
 
 SAMPLE_COMPANIES = [
-    "Google", "Microsoft", "Stripe", "Amazon", "Meta",
-    "Flipkart", "Swiggy", "Razorpay", "Zerodha", "CRED",
+    "Google",
+    "Microsoft",
+    "Stripe",
+    "Amazon",
+    "Meta",
+    "Flipkart",
+    "Swiggy",
+    "Razorpay",
+    "Zerodha",
+    "CRED",
 ]
 
 SAMPLE_SKILLS = [
-    "Python", "Go", "Java", "TypeScript", "Kubernetes",
-    "PostgreSQL", "Redis", "Kafka", "Docker", "AWS",
-    "React", "Node.js", "Terraform", "gRPC", "GraphQL",
+    "Python",
+    "Go",
+    "Java",
+    "TypeScript",
+    "Kubernetes",
+    "PostgreSQL",
+    "Redis",
+    "Kafka",
+    "Docker",
+    "AWS",
+    "React",
+    "Node.js",
+    "Terraform",
+    "gRPC",
+    "GraphQL",
 ]
 
 

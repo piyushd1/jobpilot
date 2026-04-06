@@ -1,8 +1,9 @@
-import uuid
 import datetime
-from typing import List, Optional
-from src.platforms.base import PlatformAdapter
+import uuid
+
 from src.models.schemas import RawJobArtifact
+from src.platforms.base import PlatformAdapter
+
 
 class IndeedAdapter(PlatformAdapter):
     """
@@ -10,9 +11,9 @@ class IndeedAdapter(PlatformAdapter):
     Strategy Cascade: Official Publisher API -> RapidAPI fallback
     """
 
-    async def search_jobs(self, query: str, location: str, **kwargs) -> List[RawJobArtifact]:
+    async def search_jobs(self, query: str, location: str, **kwargs) -> list[RawJobArtifact]:
         print(f"[IndeedAdapter] Searching via Publisher API for '{query}' in '{location}'")
-        
+
         return [
             RawJobArtifact(
                 job_id=f"indeed_{uuid.uuid4().hex[:8]}",
@@ -23,11 +24,11 @@ class IndeedAdapter(PlatformAdapter):
                 location=location,
                 description_raw="Join our dynamic team...",
                 application_url="https://www.indeed.com/viewjob?jk=123",
-                scraped_at=datetime.datetime.utcnow().isoformat()
+                scraped_at=datetime.datetime.utcnow().isoformat(),
             )
         ]
 
-    async def fetch_job_details(self, job_url: str) -> Optional[RawJobArtifact]:
+    async def fetch_job_details(self, job_url: str) -> RawJobArtifact | None:
         print(f"[IndeedAdapter] Fetching details via RapidAPI for {job_url}")
         return RawJobArtifact(
             job_id=f"indeed_{uuid.uuid4().hex[:8]}",
@@ -37,5 +38,5 @@ class IndeedAdapter(PlatformAdapter):
             company="Global Solutions Inc",
             description_raw="Extracted indeed description...",
             application_url=job_url,
-            scraped_at=datetime.datetime.utcnow().isoformat()
+            scraped_at=datetime.datetime.utcnow().isoformat(),
         )

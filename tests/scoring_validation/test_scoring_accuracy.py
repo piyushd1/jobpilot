@@ -5,11 +5,12 @@ validates that predicted tiers match expected tiers.
 """
 
 import json
-import pytest
 from pathlib import Path
 
-from src.scoring.engine import MatchScoringEngine
+import pytest
+
 from src.models.schemas import CandidateProfile, JobDescription, WorkExperience
+from src.scoring.engine import MatchScoringEngine
 
 pytestmark = pytest.mark.integration
 
@@ -40,9 +41,9 @@ def _build_candidate(entry: dict) -> CandidateProfile:
         open_to_remote=c.get("open_to_remote", True),
         total_experience_years=c.get("total_experience_years"),
         location=c.get("location", ""),
-        work_experience=[
-            WorkExperience(company="TestCo", title=c["target_roles"][0])
-        ] if c.get("target_roles") else [],
+        work_experience=[WorkExperience(company="TestCo", title=c["target_roles"][0])]
+        if c.get("target_roles")
+        else [],
     )
 
 
@@ -70,20 +71,24 @@ def test_ground_truth_accuracy(ground_truth, engine):
         if actual == expected:
             correct += 1
         else:
-            mismatches.append({
-                "id": entry["id"],
-                "expected": expected,
-                "actual": actual,
-                "score": result.final_score,
-                "notes": entry.get("notes", ""),
-            })
+            mismatches.append(
+                {
+                    "id": entry["id"],
+                    "expected": expected,
+                    "actual": actual,
+                    "score": result.final_score,
+                    "notes": entry.get("notes", ""),
+                }
+            )
 
     accuracy = correct / total if total > 0 else 0
     print(f"\nScoring accuracy: {correct}/{total} = {accuracy:.0%}")
     if mismatches:
         for m in mismatches:
-            print(f"  Mismatch #{m['id']}: expected={m['expected']}, "
-                  f"actual={m['actual']}, score={m['score']:.3f}")
+            print(
+                f"  Mismatch #{m['id']}: expected={m['expected']}, "
+                f"actual={m['actual']}, score={m['score']:.3f}"
+            )
 
     assert accuracy >= 0.60, f"Accuracy {accuracy:.0%} below 60% threshold"
 
@@ -114,5 +119,6 @@ def test_weak_candidates_score_below_strong(ground_truth, engine):
             good_scores.append(result.final_score)
 
     if weak_scores and good_scores:
-        assert max(weak_scores) < max(good_scores), \
+        assert max(weak_scores) < max(good_scores), (
             f"Weak max {max(weak_scores):.3f} >= Good max {max(good_scores):.3f}"
+        )

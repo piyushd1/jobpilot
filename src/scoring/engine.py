@@ -8,8 +8,8 @@ Pydantic model is returned with full transparency into every signal.
 from __future__ import annotations
 
 import math
-from datetime import datetime, timezone
-from typing import Sequence
+from collections.abc import Sequence
+from datetime import UTC, datetime
 
 from src.models.enums import MatchTier
 from src.models.schemas import CandidateProfile, JobDescription, ScoreBreakdown
@@ -67,7 +67,7 @@ def _cosine_similarity(a: Sequence[float], b: Sequence[float]) -> float:
     """Compute cosine similarity between two vectors.  Returns 0.0 on degenerate input."""
     if len(a) != len(b) or len(a) == 0:
         return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(y * y for y in b))
     if norm_a == 0.0 or norm_b == 0.0:
@@ -136,11 +136,7 @@ class MatchScoringEngine:
                     best = score
             adjacency_credits.append(best)
 
-        adj_score = (
-            sum(adjacency_credits) / len(all_jd_skills)
-            if all_jd_skills
-            else 0.0
-        )
+        adj_score = sum(adjacency_credits) / len(all_jd_skills) if all_jd_skills else 0.0
         reasons.append(
             f"Adjacency credit for {len(unmatched_jd)} unmatched JD skills: {adj_score:.2f}"
         )
@@ -222,10 +218,7 @@ class MatchScoringEngine:
         else:
             # Gaussian decay: sigma = 2 years
             sigma = 2.0
-            if cand_exp < low:
-                distance = low - cand_exp
-            else:
-                distance = cand_exp - high
+            distance = low - cand_exp if cand_exp < low else cand_exp - high
             score = math.exp(-0.5 * (distance / sigma) ** 2)
             reasons.append(
                 f"Experience {cand_exp}y outside [{low}, {high}]; "
@@ -339,10 +332,10 @@ class MatchScoringEngine:
             reasons.append("No posted date; defaulting recency to 0.5")
             return 0.5, reasons
 
-        now = reference_date or datetime.now(timezone.utc)
+        now = reference_date or datetime.now(UTC)
         posted = job.posted_date
         if posted.tzinfo is None:
-            posted = posted.replace(tzinfo=timezone.utc)
+            posted = posted.replace(tzinfo=UTC)
 
         days_old = max(0.0, (now - posted).total_seconds() / 86400)
         half_life = 14.0
@@ -390,9 +383,7 @@ class MatchScoringEngine:
                     best_adj = cs
 
             if best_adj and best_score >= 0.30:
-                gap_lines.append(
-                    f"Missing '{skill}' (closest: '{best_adj}' @ {best_score:.2f})"
-                )
+                gap_lines.append(f"Missing '{skill}' (closest: '{best_adj}' @ {best_score:.2f})")
             else:
                 gap_lines.append(f"Missing '{skill}' (no close alternative found)")
 
@@ -456,9 +447,7 @@ class MatchScoringEngine:
         trace_lines.extend(location_reasons)
 
         # 7. Recency
-        recency_score, recency_reasons = self._score_recency(
-            job, reference_date=reference_date
-        )
+        recency_score, recency_reasons = self._score_recency(job, reference_date=reference_date)
         trace_lines.extend(recency_reasons)
 
         # 8. Source confidence

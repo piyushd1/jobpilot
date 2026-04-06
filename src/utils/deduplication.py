@@ -24,7 +24,6 @@ from rapidfuzz import fuzz
 from src.models.schemas import JobDescription
 from src.utils.canonicalization import (
     normalize_company,
-    normalize_location,
     normalize_title,
 )
 from src.utils.hashing import compute_job_hash
@@ -80,7 +79,7 @@ def _merge_jobs(primary: JobDescription, secondary: JobDescription) -> JobDescri
 
 def _cosine_similarity(a: list[float], b: list[float]) -> float:
     """Compute cosine similarity between two equal-length vectors."""
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(y * y for y in b))
     if norm_a == 0 or norm_b == 0:
@@ -169,9 +168,12 @@ def _stage2_fuzzy_match(
             if embeddings is not None:
                 emb_i = embeddings.get(i)
                 emb_j = embeddings.get(j)
-                if emb_i is not None and emb_j is not None:
-                    if _cosine_similarity(emb_i, emb_j) < EMBEDDING_COSINE_THRESHOLD:
-                        continue
+                if (
+                    emb_i is not None
+                    and emb_j is not None
+                    and _cosine_similarity(emb_i, emb_j) < EMBEDDING_COSINE_THRESHOLD
+                ):
+                    continue
 
             # Merge -- prefer the record with an employer ATS link.
             if other.application_url_employer and not current.application_url_employer:

@@ -6,10 +6,9 @@ No live Temporal server needed — tests the DAG engine directly.
 
 import pytest
 
-from src.orchestration.dag import Task, TaskDAG
-from src.orchestration.shared_context import SharedContext
+from src.models.enums import TaskType
 from src.orchestration.planner import build_campaign_dag
-from src.models.enums import TaskType, TaskStatus
+from src.orchestration.shared_context import SharedContext
 
 pytestmark = pytest.mark.integration
 

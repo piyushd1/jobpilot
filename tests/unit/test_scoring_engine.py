@@ -9,7 +9,7 @@ Covers:
 """
 
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -52,7 +52,7 @@ def _make_job(**overrides) -> JobDescription:
         min_experience_years=4,
         max_experience_years=8,
         source_platform="linkedin",
-        posted_date=datetime.now(timezone.utc),
+        posted_date=datetime.now(UTC),
     )
     defaults.update(overrides)
     return JobDescription(**defaults)
@@ -69,10 +69,22 @@ def candidate():
         full_name="Jane Doe",
         location="Bangalore, India",
         skills=[
-            "Python", "Kubernetes", "PostgreSQL", "Redis", "AWS", "Docker", "Kafka",
+            "Python",
+            "Kubernetes",
+            "PostgreSQL",
+            "Redis",
+            "AWS",
+            "Docker",
+            "Kafka",
         ],
         skills_normalized=[
-            "python", "kubernetes", "postgresql", "redis", "aws", "docker", "kafka",
+            "python",
+            "kubernetes",
+            "postgresql",
+            "redis",
+            "aws",
+            "docker",
+            "kafka",
         ],
         target_roles=["Senior Software Engineer", "Backend Lead"],
         target_companies=["Google", "Microsoft"],
@@ -96,7 +108,7 @@ def job():
         min_experience_years=5,
         max_experience_years=10,
         source_platform="naukri",
-        posted_date=datetime.now(timezone.utc) - timedelta(days=3),
+        posted_date=datetime.now(UTC) - timedelta(days=3),
     )
 
 
@@ -164,7 +176,10 @@ class TestScoreSkills:
         job = _make_job(required_skills=["Python"], preferred_skills=[])
         emb = [1.0, 0.0, 0.0]
         score, _ = engine._score_skills(
-            cand, job, candidate_embedding=emb, job_skills_embedding=emb,
+            cand,
+            job,
+            candidate_embedding=emb,
+            job_skills_embedding=emb,
         )
         # Jaccard 1.0, adj 0, semantic 1.0 -> 0.40*1 + 0.40*0 + 0.20*1 = 0.60
         assert score == pytest.approx(0.60, abs=0.05)
@@ -200,7 +215,10 @@ class TestScoreTitleAlignment:
         job = _make_job(title="Any")
         emb = [0.5, 0.5, 0.5]
         score, _ = engine._score_title_alignment(
-            cand, job, candidate_title_embedding=emb, job_title_embedding=emb,
+            cand,
+            job,
+            candidate_title_embedding=emb,
+            job_title_embedding=emb,
         )
         assert score == pytest.approx(1.0, abs=0.01)
 
@@ -310,7 +328,9 @@ class TestScoreLocationFit:
 
     def test_location_mismatch_open_remote(self, engine):
         cand = _make_candidate(
-            location="London", target_locations=[], open_to_remote=True,
+            location="London",
+            target_locations=[],
+            open_to_remote=True,
         )
         job = _make_job(is_remote=False, location="New York")
         score, _ = engine._score_location_fit(cand, job)
@@ -318,7 +338,9 @@ class TestScoreLocationFit:
 
     def test_location_mismatch_not_remote(self, engine):
         cand = _make_candidate(
-            location="London", target_locations=[], open_to_remote=False,
+            location="London",
+            target_locations=[],
+            open_to_remote=False,
         )
         job = _make_job(is_remote=False, location="New York")
         score, _ = engine._score_location_fit(cand, job)
@@ -333,19 +355,19 @@ class TestScoreLocationFit:
 
 class TestScoreRecency:
     def test_just_posted(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=now)
         score, _ = engine._score_recency(job, reference_date=now)
         assert score == pytest.approx(1.0, abs=0.01)
 
     def test_14_days_half_life(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=now - timedelta(days=14))
         score, _ = engine._score_recency(job, reference_date=now)
         assert score == pytest.approx(0.5, abs=0.05)
 
     def test_28_days_quarter(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=now - timedelta(days=28))
         score, _ = engine._score_recency(job, reference_date=now)
         assert score == pytest.approx(0.25, abs=0.05)
@@ -356,7 +378,7 @@ class TestScoreRecency:
         assert score == pytest.approx(0.5)
 
     def test_naive_datetime_handled(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=datetime(2024, 1, 1))
         score, _ = engine._score_recency(job, reference_date=now)
         assert 0.0 <= score <= 1.0
@@ -462,13 +484,13 @@ def test_company_no_match(engine, candidate, job):
 
 
 def test_recency_fresh_job_high_score(engine, candidate, job):
-    job.posted_date = datetime.now(timezone.utc) - timedelta(days=1)
+    job.posted_date = datetime.now(UTC) - timedelta(days=1)
     result = engine.compute_final_score(candidate, job)
     assert result.recency_score > 0.9
 
 
 def test_recency_old_job_low_score(engine, candidate, job):
-    job.posted_date = datetime.now(timezone.utc) - timedelta(days=60)
+    job.posted_date = datetime.now(UTC) - timedelta(days=60)
     result = engine.compute_final_score(candidate, job)
     assert result.recency_score < 0.2
 
@@ -493,10 +515,22 @@ class TestTierClassification:
     def test_strong_tier(self, engine):
         cand = _make_candidate(
             skills=[
-                "Python", "Kubernetes", "PostgreSQL", "AWS", "Docker", "Kafka", "gRPC",
+                "Python",
+                "Kubernetes",
+                "PostgreSQL",
+                "AWS",
+                "Docker",
+                "Kafka",
+                "gRPC",
             ],
             skills_normalized=[
-                "python", "kubernetes", "postgresql", "aws", "docker", "kafka", "grpc",
+                "python",
+                "kubernetes",
+                "postgresql",
+                "aws",
+                "docker",
+                "kafka",
+                "grpc",
             ],
             target_roles=["Senior Software Engineer"],
             target_companies=["Acme Corp"],
@@ -513,12 +547,13 @@ class TestTierClassification:
             min_experience_years=4,
             max_experience_years=8,
             source_platform="employer_ats",
-            posted_date=datetime.now(timezone.utc),
+            posted_date=datetime.now(UTC),
         )
         # Provide high-quality embeddings to boost semantic and skill signals
         emb = [1.0, 0.0, 0.0]
         result = engine.compute_final_score(
-            cand, job,
+            cand,
+            job,
             candidate_skills_embedding=emb,
             job_skills_embedding=emb,
             candidate_title_embedding=emb,
@@ -548,7 +583,7 @@ class TestTierClassification:
             min_experience_years=8,
             max_experience_years=12,
             source_platform="unknown",
-            posted_date=datetime.now(timezone.utc) - timedelta(days=60),
+            posted_date=datetime.now(UTC) - timedelta(days=60),
         )
         result = engine.compute_final_score(cand, job)
         assert result.tier == MatchTier.WEAK.value
@@ -586,10 +621,11 @@ class TestConflictArbitration:
             min_experience_years=4,
             max_experience_years=8,
             source_platform="employer_ats",
-            posted_date=datetime.now(timezone.utc),
+            posted_date=datetime.now(UTC),
         )
         result = engine.compute_final_score(
-            cand, job,
+            cand,
+            job,
             profile_embedding=[1.0, 0.0, 0.0],
             jd_embedding=[0.95, 0.05, 0.0],
         )

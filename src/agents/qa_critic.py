@@ -11,13 +11,13 @@ Never blocks pipeline -- only flags issues. Manager decides whether to surface.
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from src.agents.base import AgentShell
-from src.models.schemas import JobDescription, ScoreBreakdown
+from src.models.schemas import ScoreBreakdown
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -71,7 +71,9 @@ class QAFlag(BaseModel):
     """A single quality-assurance flag raised by a check."""
 
     severity: str  # "error", "warning", "info"
-    category: str  # "schema", "consistency", "injection", "hallucination", "contradiction", "confidence"
+    category: (
+        str  # "schema", "consistency", "injection", "hallucination", "contradiction", "confidence"
+    )
     entity_id: str = ""
     message: str = ""
     details: dict[str, Any] = Field(default_factory=dict)
@@ -102,8 +104,7 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
 
     agent_name: str = "qa_critic"
     persona: str = (
-        "You are a quality assurance agent that verifies data integrity "
-        "across the pipeline."
+        "You are a quality assurance agent that verifies data integrity across the pipeline."
     )
 
     # --- Schema properties ---
@@ -143,40 +144,41 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
             # -- Schema completeness --
             title = job.get("title")
             if not title or not isinstance(title, str) or not title.strip():
-                flags.append(QAFlag(
-                    severity="error",
-                    category="schema",
-                    entity_id=entity_id,
-                    message="Missing or empty 'title' field",
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="error",
+                        category="schema",
+                        entity_id=entity_id,
+                        message="Missing or empty 'title' field",
+                    )
+                )
 
             company = job.get("company")
             if not company or not isinstance(company, str) or not company.strip():
-                flags.append(QAFlag(
-                    severity="error",
-                    category="schema",
-                    entity_id=entity_id,
-                    message="Missing or empty 'company' field",
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="error",
+                        category="schema",
+                        entity_id=entity_id,
+                        message="Missing or empty 'company' field",
+                    )
+                )
 
             # -- Consistency: experience range --
             min_exp = job.get("min_experience_years")
             max_exp = job.get("max_experience_years")
-            if (
-                min_exp is not None
-                and max_exp is not None
-                and min_exp > max_exp
-            ):
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="consistency",
-                    entity_id=entity_id,
-                    message=(
-                        f"min_experience_years ({min_exp}) > "
-                        f"max_experience_years ({max_exp})"
-                    ),
-                    details={"min": min_exp, "max": max_exp},
-                ))
+            if min_exp is not None and max_exp is not None and min_exp > max_exp:
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="consistency",
+                        entity_id=entity_id,
+                        message=(
+                            f"min_experience_years ({min_exp}) > max_experience_years ({max_exp})"
+                        ),
+                        details={"min": min_exp, "max": max_exp},
+                    )
+                )
 
             # -- Consistency: posted_date not in the future --
             posted_date = job.get("posted_date")
@@ -191,42 +193,42 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
 
                     if pd is not None:
                         # Ensure timezone-aware comparison
-                        now = datetime.now(timezone.utc)
+                        now = datetime.now(UTC)
                         if pd.tzinfo is None:
-                            pd = pd.replace(tzinfo=timezone.utc)
+                            pd = pd.replace(tzinfo=UTC)
                         if pd > now:
-                            flags.append(QAFlag(
-                                severity="warning",
-                                category="consistency",
-                                entity_id=entity_id,
-                                message=f"posted_date is in the future: {pd.isoformat()}",
-                                details={"posted_date": pd.isoformat()},
-                            ))
+                            flags.append(
+                                QAFlag(
+                                    severity="warning",
+                                    category="consistency",
+                                    entity_id=entity_id,
+                                    message=f"posted_date is in the future: {pd.isoformat()}",
+                                    details={"posted_date": pd.isoformat()},
+                                )
+                            )
                 except (ValueError, TypeError):
-                    flags.append(QAFlag(
-                        severity="warning",
-                        category="consistency",
-                        entity_id=entity_id,
-                        message=f"posted_date could not be parsed: {posted_date!r}",
-                    ))
+                    flags.append(
+                        QAFlag(
+                            severity="warning",
+                            category="consistency",
+                            entity_id=entity_id,
+                            message=f"posted_date could not be parsed: {posted_date!r}",
+                        )
+                    )
 
             # -- Consistency: salary range --
             salary_min = job.get("salary_min")
             salary_max = job.get("salary_max")
-            if (
-                salary_min is not None
-                and salary_max is not None
-                and salary_min > salary_max
-            ):
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="consistency",
-                    entity_id=entity_id,
-                    message=(
-                        f"salary_min ({salary_min}) > salary_max ({salary_max})"
-                    ),
-                    details={"salary_min": salary_min, "salary_max": salary_max},
-                ))
+            if salary_min is not None and salary_max is not None and salary_min > salary_max:
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="consistency",
+                        entity_id=entity_id,
+                        message=(f"salary_min ({salary_min}) > salary_max ({salary_max})"),
+                        details={"salary_min": salary_min, "salary_max": salary_max},
+                    )
+                )
 
             # -- Prompt injection scan --
             description = job.get("description") or ""
@@ -234,20 +236,19 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
                 for pattern in _INJECTION_PATTERNS:
                     match = pattern.search(description)
                     if match:
-                        flags.append(QAFlag(
-                            severity="error",
-                            category="injection",
-                            entity_id=entity_id,
-                            message=(
-                                f"Possible prompt injection detected: "
-                                f"'{match.group()}'"
-                            ),
-                            details={
-                                "pattern": pattern.pattern,
-                                "match": match.group(),
-                                "position": match.start(),
-                            },
-                        ))
+                        flags.append(
+                            QAFlag(
+                                severity="error",
+                                category="injection",
+                                entity_id=entity_id,
+                                message=(f"Possible prompt injection detected: '{match.group()}'"),
+                                details={
+                                    "pattern": pattern.pattern,
+                                    "match": match.group(),
+                                    "position": match.start(),
+                                },
+                            )
+                        )
 
         has_errors = any(f.severity == "error" for f in flags)
         error_count = sum(1 for f in flags if f.severity == "error")
@@ -258,10 +259,7 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
             total_checked=len(jobs),
             flags=flags,
             passed=not has_errors,
-            summary=(
-                f"Checked {len(jobs)} jobs: "
-                f"{error_count} errors, {warning_count} warnings"
-            ),
+            summary=(f"Checked {len(jobs)} jobs: {error_count} errors, {warning_count} warnings"),
         )
 
     # ------------------------------------------------------------------
@@ -295,19 +293,21 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
             mentions_strong = any(kw in reasoning_lower for kw in strong_keywords)
 
             if mentions_strong and final_score < 0.5:
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="contradiction",
-                    entity_id=entity_id,
-                    message=(
-                        f"Reasoning mentions positive language but "
-                        f"final_score is low ({final_score:.2f})"
-                    ),
-                    details={
-                        "final_score": final_score,
-                        "reasoning_excerpt": reasoning_trace[:200],
-                    },
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="contradiction",
+                        entity_id=entity_id,
+                        message=(
+                            f"Reasoning mentions positive language but "
+                            f"final_score is low ({final_score:.2f})"
+                        ),
+                        details={
+                            "final_score": final_score,
+                            "reasoning_excerpt": reasoning_trace[:200],
+                        },
+                    )
+                )
 
             # -- Hallucination: high skills_score but low actual overlap --
             skills_score: float = 0.0
@@ -328,29 +328,29 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
                     required_set = {s.lower().strip() for s in required_skills}
                     candidate_set = {s.lower().strip() for s in candidate_skills}
                     overlap = required_set & candidate_set
-                    overlap_ratio = (
-                        len(overlap) / len(required_set) if required_set else 0.0
-                    )
+                    overlap_ratio = len(overlap) / len(required_set) if required_set else 0.0
 
                     if overlap_ratio < 0.3:
-                        flags.append(QAFlag(
-                            severity="warning",
-                            category="hallucination",
-                            entity_id=entity_id,
-                            message=(
-                                f"skills_score is {skills_score:.2f} but "
-                                f"actual skill overlap is only "
-                                f"{overlap_ratio:.0%} "
-                                f"({len(overlap)}/{len(required_set)})"
-                            ),
-                            details={
-                                "skills_score": skills_score,
-                                "overlap_ratio": overlap_ratio,
-                                "overlap_count": len(overlap),
-                                "required_count": len(required_set),
-                                "overlapping_skills": sorted(overlap),
-                            },
-                        ))
+                        flags.append(
+                            QAFlag(
+                                severity="warning",
+                                category="hallucination",
+                                entity_id=entity_id,
+                                message=(
+                                    f"skills_score is {skills_score:.2f} but "
+                                    f"actual skill overlap is only "
+                                    f"{overlap_ratio:.0%} "
+                                    f"({len(overlap)}/{len(required_set)})"
+                                ),
+                                details={
+                                    "skills_score": skills_score,
+                                    "overlap_ratio": overlap_ratio,
+                                    "overlap_count": len(overlap),
+                                    "required_count": len(required_set),
+                                    "overlapping_skills": sorted(overlap),
+                                },
+                            )
+                        )
 
         has_errors = any(f.severity == "error" for f in flags)
         warning_count = sum(1 for f in flags if f.severity == "warning")
@@ -360,10 +360,7 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
             total_checked=len(matches),
             flags=flags,
             passed=not has_errors,
-            summary=(
-                f"Checked {len(matches)} matches: "
-                f"{warning_count} warnings"
-            ),
+            summary=(f"Checked {len(matches)} matches: {warning_count} warnings"),
         )
 
     # ------------------------------------------------------------------
@@ -380,46 +377,39 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
 
         # -- Contact confidence checks --
         for idx, contact in enumerate(contacts):
-            entity_id = (
-                contact.get("contact_id")
-                or contact.get("name")
-                or f"contact_{idx}"
-            )
+            entity_id = contact.get("contact_id") or contact.get("name") or f"contact_{idx}"
 
             email = contact.get("email")
             linkedin_url = contact.get("linkedin_url")
 
             has_email = bool(email and isinstance(email, str) and email.strip())
             has_linkedin = bool(
-                linkedin_url
-                and isinstance(linkedin_url, str)
-                and linkedin_url.strip()
+                linkedin_url and isinstance(linkedin_url, str) and linkedin_url.strip()
             )
 
             if not has_email and not has_linkedin:
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="confidence",
-                    entity_id=entity_id,
-                    message=(
-                        "Contact has neither email nor linkedin_url -- "
-                        "outreach may not be possible"
-                    ),
-                    details={
-                        "available_fields": [
-                            k for k, v in contact.items()
-                            if v and k not in ("email", "linkedin_url")
-                        ],
-                    },
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="confidence",
+                        entity_id=entity_id,
+                        message=(
+                            "Contact has neither email nor linkedin_url -- "
+                            "outreach may not be possible"
+                        ),
+                        details={
+                            "available_fields": [
+                                k
+                                for k, v in contact.items()
+                                if v and k not in ("email", "linkedin_url")
+                            ],
+                        },
+                    )
+                )
 
         # -- Draft checks --
         for idx, draft in enumerate(drafts):
-            entity_id = (
-                draft.get("draft_id")
-                or draft.get("subject")
-                or f"draft_{idx}"
-            )
+            entity_id = draft.get("draft_id") or draft.get("subject") or f"draft_{idx}"
             body = draft.get("body") or draft.get("message") or ""
 
             if not isinstance(body, str):
@@ -427,28 +417,32 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
 
             # Length bounds
             if len(body) < _DRAFT_MIN_LENGTH:
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="confidence",
-                    entity_id=entity_id,
-                    message=(
-                        f"Draft body is too short ({len(body)} chars, "
-                        f"minimum {_DRAFT_MIN_LENGTH})"
-                    ),
-                    details={"length": len(body), "min": _DRAFT_MIN_LENGTH},
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="confidence",
+                        entity_id=entity_id,
+                        message=(
+                            f"Draft body is too short ({len(body)} chars, "
+                            f"minimum {_DRAFT_MIN_LENGTH})"
+                        ),
+                        details={"length": len(body), "min": _DRAFT_MIN_LENGTH},
+                    )
+                )
 
             if len(body) > _DRAFT_MAX_LENGTH:
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="confidence",
-                    entity_id=entity_id,
-                    message=(
-                        f"Draft body is too long ({len(body)} chars, "
-                        f"maximum {_DRAFT_MAX_LENGTH})"
-                    ),
-                    details={"length": len(body), "max": _DRAFT_MAX_LENGTH},
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="confidence",
+                        entity_id=entity_id,
+                        message=(
+                            f"Draft body is too long ({len(body)} chars, "
+                            f"maximum {_DRAFT_MAX_LENGTH})"
+                        ),
+                        details={"length": len(body), "max": _DRAFT_MAX_LENGTH},
+                    )
+                )
 
             # Fabricated quotes detection: look for double-quoted text that
             # is suspiciously specific (long, contains names or numbers that
@@ -456,37 +450,38 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
             # potentially fabricated -- the Manager can review.
             quoted_passages = re.findall(r'"([^"]{80,})"', body)
             for passage in quoted_passages:
-                flags.append(QAFlag(
-                    severity="warning",
-                    category="hallucination",
-                    entity_id=entity_id,
-                    message=(
-                        "Draft contains a long quoted passage that may be "
-                        "fabricated"
-                    ),
-                    details={
-                        "quote_length": len(passage),
-                        "quote_preview": passage[:120],
-                    },
-                ))
+                flags.append(
+                    QAFlag(
+                        severity="warning",
+                        category="hallucination",
+                        entity_id=entity_id,
+                        message=("Draft contains a long quoted passage that may be fabricated"),
+                        details={
+                            "quote_length": len(passage),
+                            "quote_preview": passage[:120],
+                        },
+                    )
+                )
 
             # Also flag shorter quotes that contain specific numbers, dollar
             # amounts, or percentages -- these are common hallucination tells.
             short_quotes = re.findall(r'"([^"]{20,80})"', body)
             for quote in short_quotes:
                 if re.search(r"\$[\d,]+|[\d]+%|\d{4,}", quote):
-                    flags.append(QAFlag(
-                        severity="info",
-                        category="hallucination",
-                        entity_id=entity_id,
-                        message=(
-                            "Draft contains a quoted passage with specific "
-                            "numbers that should be verified"
-                        ),
-                        details={
-                            "quote_preview": quote,
-                        },
-                    ))
+                    flags.append(
+                        QAFlag(
+                            severity="info",
+                            category="hallucination",
+                            entity_id=entity_id,
+                            message=(
+                                "Draft contains a quoted passage with specific "
+                                "numbers that should be verified"
+                            ),
+                            details={
+                                "quote_preview": quote,
+                            },
+                        )
+                    )
 
         has_errors = any(f.severity == "error" for f in flags)
         error_count = sum(1 for f in flags if f.severity == "error")

@@ -8,8 +8,7 @@ pytestmark = pytest.mark.unit
 def test_imports():
     """Verify all core packages are importable."""
     from src.config.settings import settings
-    from src.models.enums import TaskType, TaskStatus, CampaignStatus, MatchTier
-    from src.models.schemas import CandidateProfile, JobDescription, ScoreBreakdown
+    from src.models.enums import CampaignStatus, MatchTier, TaskStatus, TaskType
 
     assert settings.app_env == "development"
     assert TaskType.PARSE_RESUME == "parse_resume"
