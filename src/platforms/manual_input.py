@@ -13,7 +13,7 @@ class ManualInputService:
     async def parse_urls(self, urls: list[str]) -> list[RawJobArtifact]:
         """
         Takes a list of URLs, optionally fetches their content, and generates artifacts.
-        Since we might not have a web scraper in this barebones phase, we will mock parsing slightly, 
+        Since we might not have a web scraper in this barebones phase, we will mock parsing slightly,
         or use LiteLLM to structure just the URLs assuming they contain hints.
         For production, a web scraper tool fetches the DOM before sending to LiteLLM.
         """
@@ -22,13 +22,16 @@ class ManualInputService:
             prompt = f"Parse the following job URL and extract best-effort title and company: {url}"
             try:
                 # In complete implementation, we'd fetch URL HTML first
-                response = await litellm.acompletion(
+                await litellm.acompletion(
                     model=self.model,
                     messages=[
-                        {"role": "system", "content": "You extract job info from minimal context. Return a JSON structure."},
-                        {"role": "user", "content": prompt}
+                        {
+                            "role": "system",
+                            "content": "You extract job info from minimal context. Return a JSON structure.",
+                        },
+                        {"role": "user", "content": prompt},
                     ],
-                    response_format={ "type": "json_object" }
+                    response_format={"type": "json_object"},
                 )
 
                 # Mock extraction assuming LLM gave valid output
@@ -41,7 +44,7 @@ class ManualInputService:
                         company="Unknown Company",
                         description_raw=f"Job found at {url}",
                         application_url=url,
-                        scraped_at=datetime.datetime.utcnow().isoformat()
+                        scraped_at=datetime.datetime.utcnow().isoformat(),
                     )
                 )
             except Exception as e:
@@ -55,13 +58,13 @@ class ManualInputService:
         # A full prompt to `litellm` asking for `List[RawJobArtifact]` schema extraction
         # Mocking for skeleton:
         return [
-             RawJobArtifact(
+            RawJobArtifact(
                 job_id=f"manual_{uuid.uuid4().hex[:8]}",
                 source_platform="manual_text_paste",
                 title="Software Engineer",
                 company="Mock Corp",
                 description_raw=text[:200] + "...",
                 application_url="https://mockcorp.com/jobs",
-                scraped_at=datetime.datetime.utcnow().isoformat()
+                scraped_at=datetime.datetime.utcnow().isoformat(),
             )
         ]

@@ -1,4 +1,5 @@
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
@@ -9,7 +10,7 @@ storage_service = MinioStorage()
 
 
 @router.post("/upload")
-async def upload_resume(file: UploadFile = File(...)):
+async def upload_resume(file: Annotated[UploadFile, File(...)]):
     """
     Validates PDF, encrypts & uploads to MinIO.
     Returns the storage reference.

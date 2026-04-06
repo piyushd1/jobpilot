@@ -2,6 +2,7 @@
 
 Provides proxy rotation, health tracking, and geo-targeting for India job boards.
 """
+
 from __future__ import annotations
 
 import random
@@ -12,6 +13,7 @@ from src.config.settings import settings
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
 
 @dataclass
 class ProxyConfig:
@@ -28,6 +30,7 @@ class ProxyConfig:
         if self.username:
             return f"{self.protocol}://{self.username}:{self.password}@{self.host}:{self.port}"
         return f"{self.protocol}://{self.host}:{self.port}"
+
 
 @dataclass
 class ProxyHealth:
@@ -48,7 +51,9 @@ class ProxyHealth:
             self.failure_count = 0
         return self.is_healthy
 
+
 INDIA_DOMAINS = {"naukri.com", "iimjobs.com", "hirist.com", "instahyre.com", "foundit.in"}
+
 
 class ProxyPoolManager:
     def __init__(self) -> None:
@@ -59,20 +64,27 @@ class ProxyPoolManager:
     def _init_pools(self) -> None:
         # BrightData (primary) - configured via settings
         if settings.brightdata_username:
-            for i in range(5):
-                self._pools["primary"].append(ProxyHealth(
-                    proxy=ProxyConfig(
-                        host="brd.superproxy.io", port=22225,
-                        username=f"{settings.brightdata_username}-session-{random.randint(10000,99999)}",
-                        password=settings.brightdata_password,
-                        provider="brightdata", geo="in",
+            for _i in range(5):
+                self._pools["primary"].append(
+                    ProxyHealth(
+                        proxy=ProxyConfig(
+                            host="brd.superproxy.io",
+                            port=22225,
+                            username=f"{settings.brightdata_username}-session-{random.randint(10000, 99999)}",
+                            password=settings.brightdata_password,
+                            provider="brightdata",
+                            geo="in",
+                        )
                     )
-                ))
+                )
         # SmartProxy (secondary) - placeholder
-        self._pools["secondary"].append(ProxyHealth(
-            proxy=ProxyConfig(host="gate.smartproxy.com", port=7000,
-                            provider="smartproxy", geo="in")
-        ))
+        self._pools["secondary"].append(
+            ProxyHealth(
+                proxy=ProxyConfig(
+                    host="gate.smartproxy.com", port=7000, provider="smartproxy", geo="in"
+                )
+            )
+        )
 
     def get_proxy(self, domain: str = "") -> ProxyConfig | None:
         needs_india = any(d in domain.lower() for d in INDIA_DOMAINS)
@@ -100,5 +112,6 @@ class ProxyPoolManager:
                     ph.mark_failed()
                     logger.info("Proxy marked unhealthy", host=proxy.host, provider=proxy.provider)
                     return
+
 
 proxy_pool = ProxyPoolManager()

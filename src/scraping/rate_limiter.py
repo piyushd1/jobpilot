@@ -3,6 +3,7 @@
 Uses Redis atomic operations for distributed rate limiting.
 Supports halving rate on 429 responses and Retry-After header respect.
 """
+
 from __future__ import annotations
 
 import time
@@ -13,11 +14,13 @@ from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-class RateLimitExceeded(Exception):
+
+class RateLimitExceededError(Exception):
     def __init__(self, domain: str, retry_after: float = 0):
         self.domain = domain
         self.retry_after = retry_after
         super().__init__(f"Rate limit exceeded for {domain}, retry after {retry_after}s")
+
 
 # Default rate configs per Section 11.3
 DEFAULT_RATE_CONFIGS: dict[str, dict] = {
@@ -32,10 +35,12 @@ DEFAULT_RATE_CONFIGS: dict[str, dict] = {
     "default": {"max_rpm": 10, "burst": 3},
 }
 
+
 @dataclass
 class RateConfig:
     max_rpm: int = 10
     burst: int = 3
+
 
 class RedisTokenBucket:
     def __init__(self, configs: dict[str, dict] | None = None) -> None:
@@ -68,10 +73,10 @@ class RedisTokenBucket:
                 await cache.expire(window_key, 120)  # TTL 2 min
 
             if count > config.max_rpm:
-                raise RateLimitExceeded(domain, retry_after=60 - (now % 60))
+                raise RateLimitExceededError(domain, retry_after=60 - (now % 60))
 
             return True
-        except RateLimitExceeded:
+        except RateLimitExceededError:
             raise
         except Exception:
             # If Redis is down, allow the request (fail-open)
@@ -84,5 +89,6 @@ class RedisTokenBucket:
 
     def respect_retry_after(self, domain: str, retry_after_seconds: float) -> None:
         self.halve_rate(domain, retry_after_seconds)
+
 
 rate_limiter = RedisTokenBucket()
