@@ -1,8 +1,9 @@
 """Build the initial 6-phase execution DAG from user inputs."""
 from __future__ import annotations
-import uuid
+
 from src.models.enums import TaskType
 from src.orchestration.dag import Task, TaskDAG
+
 
 def build_campaign_dag(
     campaign_id: str,

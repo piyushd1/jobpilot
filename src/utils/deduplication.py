@@ -24,7 +24,6 @@ from rapidfuzz import fuzz
 from src.models.schemas import JobDescription
 from src.utils.canonicalization import (
     normalize_company,
-    normalize_location,
     normalize_title,
 )
 from src.utils.hashing import compute_job_hash

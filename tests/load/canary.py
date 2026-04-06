@@ -10,13 +10,13 @@ from __future__ import annotations
 
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
+from src.models.schemas import CandidateProfile, JobDescription, WorkExperience
 from src.platforms.source_policy import source_registry
 from src.scoring.engine import MatchScoringEngine
 from src.scoring.risk_detector import JobRiskDetector
-from src.models.schemas import CandidateProfile, JobDescription, WorkExperience
 from src.utils.deduplication import deduplicate_jobs
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
@@ -48,7 +48,7 @@ def _sample_candidate() -> CandidateProfile:
 async def run_canary() -> dict:
     """Run canary checks on all core pipeline components."""
     results = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "checks": {},
     }
 

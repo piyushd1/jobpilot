@@ -102,7 +102,7 @@ class VectorStore:
 
         Returns list of dicts with: id, score, payload.
         """
-        from qdrant_client.models import Filter, FieldCondition, MatchValue
+        from qdrant_client.models import FieldCondition, Filter, MatchValue
 
         qdrant_filter = None
         if filter_conditions:

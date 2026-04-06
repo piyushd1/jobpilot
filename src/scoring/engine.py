@@ -8,8 +8,8 @@ Pydantic model is returned with full transparency into every signal.
 from __future__ import annotations
 
 import math
-from datetime import datetime, timezone
-from typing import Sequence
+from collections.abc import Sequence
+from datetime import UTC, datetime
 
 from src.models.enums import MatchTier
 from src.models.schemas import CandidateProfile, JobDescription, ScoreBreakdown
@@ -339,10 +339,10 @@ class MatchScoringEngine:
             reasons.append("No posted date; defaulting recency to 0.5")
             return 0.5, reasons
 
-        now = reference_date or datetime.now(timezone.utc)
+        now = reference_date or datetime.now(UTC)
         posted = job.posted_date
         if posted.tzinfo is None:
-            posted = posted.replace(tzinfo=timezone.utc)
+            posted = posted.replace(tzinfo=UTC)
 
         days_old = max(0.0, (now - posted).total_seconds() / 86400)
         half_life = 14.0

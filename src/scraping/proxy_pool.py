@@ -3,10 +3,11 @@
 Provides proxy rotation, health tracking, and geo-targeting for India job boards.
 """
 from __future__ import annotations
-import time
+
 import random
-from dataclasses import dataclass, field
-from typing import Any
+import time
+from dataclasses import dataclass
+
 from src.config.settings import settings
 from src.utils.logging import get_logger
 

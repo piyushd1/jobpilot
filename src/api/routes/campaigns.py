@@ -1,14 +1,14 @@
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List, Optional
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
 class CampaignCreate(BaseModel):
     resume_id: str
-    target_roles: List[str]
-    target_companies: List[str]
-    target_locations: List[str]
+    target_roles: list[str]
+    target_companies: list[str]
+    target_locations: list[str]
     remote_preference: str
 
 @router.post("/")

@@ -1,8 +1,9 @@
-import uuid
 import datetime
-from typing import List, Optional
-from src.platforms.base import PlatformAdapter
+import uuid
+
 from src.models.schemas import RawJobArtifact
+from src.platforms.base import PlatformAdapter
+
 
 class NaukriAdapter(PlatformAdapter):
     """
@@ -10,10 +11,10 @@ class NaukriAdapter(PlatformAdapter):
     Strategy Cascade: SerpAPI (Google search) -> Apify (Actor fallback) -> Manual ATS Extraction
     """
 
-    async def search_jobs(self, query: str, location: str, **kwargs) -> List[RawJobArtifact]:
+    async def search_jobs(self, query: str, location: str, **kwargs) -> list[RawJobArtifact]:
         # Mocking SerpAPI call response
         print(f"[NaukriAdapter] Searching via SerpAPI for '{query}' in '{location}'")
-        
+
         # Simulated payload
         return [
             RawJobArtifact(
@@ -29,7 +30,7 @@ class NaukriAdapter(PlatformAdapter):
             )
         ]
 
-    async def fetch_job_details(self, job_url: str) -> Optional[RawJobArtifact]:
+    async def fetch_job_details(self, job_url: str) -> RawJobArtifact | None:
         print(f"[NaukriAdapter] Fetching details via Apify fallback for {job_url}")
         return RawJobArtifact(
             job_id=f"naukri_{uuid.uuid4().hex[:8]}",

@@ -1,9 +1,11 @@
 """Task DAG engine for managing execution dependencies."""
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
-from src.models.enums import TaskType, TaskStatus
+
+from src.models.enums import TaskStatus, TaskType
+
 
 @dataclass
 class Task:

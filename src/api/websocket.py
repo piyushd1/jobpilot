@@ -1,6 +1,7 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-import json
 import asyncio
+import json
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ async def websocket_endpoint(websocket: WebSocket, campaign_id: str):
             "type": "UPDATE",
             "data": {"phase": "COMPLETED", "status": "OK", "detail": "Shortlist ready for review."}
         }))
-        
+
         while True:
             # Maintain open socket for future events
             data = await websocket.receive_text()

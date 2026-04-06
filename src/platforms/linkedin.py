@@ -1,8 +1,9 @@
-import uuid
 import datetime
-from typing import List, Optional
-from src.platforms.base import PlatformAdapter
+import uuid
+
 from src.models.schemas import RawJobArtifact
+from src.platforms.base import PlatformAdapter
+
 
 class LinkedInAdapter(PlatformAdapter):
     """
@@ -10,7 +11,7 @@ class LinkedInAdapter(PlatformAdapter):
     Strategy Cascade: Official API -> RapidAPI fallback (jsearch) -> Scraping
     """
 
-    async def search_jobs(self, query: str, location: str, **kwargs) -> List[RawJobArtifact]:
+    async def search_jobs(self, query: str, location: str, **kwargs) -> list[RawJobArtifact]:
         print(f"[LinkedInAdapter] Searching via RapidAPI wrapper for '{query}' in '{location}'")
         return [
             RawJobArtifact(
@@ -26,7 +27,7 @@ class LinkedInAdapter(PlatformAdapter):
             )
         ]
 
-    async def fetch_job_details(self, job_url: str) -> Optional[RawJobArtifact]:
+    async def fetch_job_details(self, job_url: str) -> RawJobArtifact | None:
         return RawJobArtifact(
             job_id=f"linkedin_{uuid.uuid4().hex[:8]}",
             source_platform="linkedin",

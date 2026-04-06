@@ -1,8 +1,7 @@
-import imaplib
 import email
-from email.header import decode_header
+import imaplib
 import re
-from typing import List
+
 
 class AlertIngestionService:
     """
@@ -21,7 +20,7 @@ class AlertIngestionService:
         except Exception as e:
             print(f"IMAP Connection failed: {e}")
 
-    def fetch_recent_alerts(self, limit=10) -> List[str]:
+    def fetch_recent_alerts(self, limit=10) -> list[str]:
         """
         Fetch emails and extract raw URLs containing jobs.
         """
@@ -30,7 +29,7 @@ class AlertIngestionService:
             self.mail.select('inbox')
             # Search for typical alert senders
             status, messages = self.mail.search(None, '(OR FROM "naukri.com" FROM "indeed.com") UNSEEN')
-            
+
             if status != "OK":
                 return urls_found
 
@@ -47,5 +46,5 @@ class AlertIngestionService:
                         urls_found.extend(extracted)
         except Exception as e:
             print(f"Error fetching alerts: {e}")
-            
+
         return urls_found

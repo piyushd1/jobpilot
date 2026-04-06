@@ -1,5 +1,7 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
 import uuid
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
+
 from src.services.storage import MinioStorage
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])

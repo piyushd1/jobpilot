@@ -1,13 +1,14 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Form
+
+from fastapi import APIRouter, Form
 from pydantic import BaseModel
-from typing import List, Optional
+
 from src.platforms.manual_input import ManualInputService
 
 router = APIRouter(prefix="/campaigns/{campaign_id}/manual-links", tags=["manual_links"])
 manual_service = ManualInputService()
 
 class ManualUrlsRequest(BaseModel):
-    urls: List[str]
+    urls: list[str]
 
 @router.post("/urls")
 async def add_manual_urls(campaign_id: str, payload: ManualUrlsRequest):

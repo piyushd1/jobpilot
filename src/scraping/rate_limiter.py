@@ -4,8 +4,10 @@ Uses Redis atomic operations for distributed rate limiting.
 Supports halving rate on 429 responses and Retry-After header respect.
 """
 from __future__ import annotations
+
 import time
 from dataclasses import dataclass
+
 from src.services.cache import cache
 from src.utils.logging import get_logger
 

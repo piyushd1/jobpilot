@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any
 
 from src.models.schemas import JobDescription
 from src.utils.logging import get_logger

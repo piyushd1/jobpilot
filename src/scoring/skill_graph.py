@@ -6,7 +6,6 @@ scores between related technologies (e.g., kubernetes <-> docker = 0.8).
 
 from __future__ import annotations
 
-
 # ---------------------------------------------------------------------------
 # Synonym registry
 # Keys are canonical skill names (lowercase).  Values are sets of known

@@ -1,7 +1,8 @@
-from fastapi import APIRouter
-from fastapi.responses import Response
 import csv
 import io
+
+from fastapi import APIRouter
+from fastapi.responses import Response
 
 router = APIRouter()
 
@@ -15,12 +16,12 @@ async def export_csv(campaign_id: str):
         {"Company": "Google", "Role": "Senior Engineer", "Match": "98%", "Contact Name": "John Doe", "Contact Role": "Hiring Manager"},
         {"Company": "Stripe", "Role": "Backend Engineer", "Match": "95%", "Contact Name": "Jane Smith", "Contact Role": "Recruiter"}
     ]
-    
+
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=["Company", "Role", "Match", "Contact Name", "Contact Role"])
     writer.writeheader()
     writer.writerows(mock_data)
-    
+
     return Response(
         content=output.getvalue(),
         media_type="text/csv",

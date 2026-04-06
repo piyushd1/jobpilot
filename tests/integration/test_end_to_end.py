@@ -5,8 +5,9 @@ No external API calls — uses pre-built fixtures.
 """
 
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 
 from src.models.schemas import CandidateProfile, JobDescription, WorkExperience
 from src.scoring.engine import MatchScoringEngine

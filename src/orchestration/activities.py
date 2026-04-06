@@ -1,7 +1,10 @@
 """Temporal Activity definitions wrapping agent execution."""
 from __future__ import annotations
+
 from typing import Any
+
 from temporalio import activity
+
 
 @activity.defn
 async def execute_agent_activity(
@@ -12,7 +15,6 @@ async def execute_agent_activity(
 
     Returns the AgentResult as a dict.
     """
-    from src.agents.base import AgentResult
 
     agent = _get_agent(agent_name)
     result = await agent.execute(input_payload)

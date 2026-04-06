@@ -1,5 +1,3 @@
-import litellm
-import json
 
 class OutreachFinderAgent:
     """
@@ -20,16 +18,16 @@ class OutreachFinderAgent:
 
     async def discover_contacts(self, company_name: str, job_title: str) -> list:
         print(f"[OutreachFinder] Finding contacts for {job_title} at {company_name}")
-        
+
         # simulated logic building search payloads
         manager_query = f"site:linkedin.com/in \"{company_name}\" (\"VP Engineering\" OR \"Director of Engineering\" OR \"Engineering Manager\")"
         recruiter_query = f"site:linkedin.com/in \"{company_name}\" (\"Technical Recruiter\" OR \"Talent Acquisition\")"
-        
+
         manager_results = self._mock_google_search(manager_query)
         recruiter_results = self._mock_google_search(recruiter_query)
 
         contacts = []
-        
+
         if manager_results:
             contacts.append({
                 "name": manager_results[0]["title"].split("-")[0].strip(),
@@ -37,7 +35,7 @@ class OutreachFinderAgent:
                 "linkedin": manager_results[0]["link"],
                 "tier": 2
             })
-            
+
         if recruiter_results:
             contacts.append({
                 "name": recruiter_results[0]["title"].split("-")[0].strip(),

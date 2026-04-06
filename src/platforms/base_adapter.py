@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from src.models.enums import RetrievalStrategy
-from src.platforms.source_policy import SourcePolicy, SourcePolicyRegistry, source_registry
+from src.platforms.source_policy import SourcePolicyRegistry, source_registry
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)

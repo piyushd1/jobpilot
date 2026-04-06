@@ -1,5 +1,6 @@
 import litellm
 
+
 class ResearchAgent:
     """
     Agent 3: Enriches company data (funding, size, ratings) via search.
@@ -12,10 +13,10 @@ class ResearchAgent:
         Triggered when a new job is discovered. Searches Crunchbase/Glassdoor.
         """
         print(f"[ResearchAgent] Enriching data for {company_name}")
-        
+
         # In a full implementation, this uses SerpAPI for glassdoor and crunchbase
         prompt = f"Provide a JSON estimate for '{company_name}': funding_stage (e.g. Series A, Public), employee_count (e.g. 100-500), glassdoor_rating_estimate (0.0-5.0)."
-        
+
         try:
             response = await litellm.acompletion(
                 model=self.model,

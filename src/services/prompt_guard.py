@@ -4,8 +4,10 @@ Scans user-provided text (resumes, JDs, manual input) for
 injection patterns before sending to LLM.
 """
 from __future__ import annotations
+
 import re
 from dataclasses import dataclass
+
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)

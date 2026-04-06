@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import random
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from src.utils.logging import get_logger

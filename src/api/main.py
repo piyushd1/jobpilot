@@ -1,8 +1,8 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 
-from src.api.routes import resume, campaigns, results, approvals, feedback, manual_links
+from src.api.routes import approvals, campaigns, feedback, manual_links, results, resume
 
 app = FastAPI(title="JobPilot API", version="1.0.0")
 

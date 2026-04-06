@@ -9,7 +9,7 @@ Covers:
 """
 
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -52,7 +52,7 @@ def _make_job(**overrides) -> JobDescription:
         min_experience_years=4,
         max_experience_years=8,
         source_platform="linkedin",
-        posted_date=datetime.now(timezone.utc),
+        posted_date=datetime.now(UTC),
     )
     defaults.update(overrides)
     return JobDescription(**defaults)
@@ -96,7 +96,7 @@ def job():
         min_experience_years=5,
         max_experience_years=10,
         source_platform="naukri",
-        posted_date=datetime.now(timezone.utc) - timedelta(days=3),
+        posted_date=datetime.now(UTC) - timedelta(days=3),
     )
 
 
@@ -333,19 +333,19 @@ class TestScoreLocationFit:
 
 class TestScoreRecency:
     def test_just_posted(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=now)
         score, _ = engine._score_recency(job, reference_date=now)
         assert score == pytest.approx(1.0, abs=0.01)
 
     def test_14_days_half_life(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=now - timedelta(days=14))
         score, _ = engine._score_recency(job, reference_date=now)
         assert score == pytest.approx(0.5, abs=0.05)
 
     def test_28_days_quarter(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=now - timedelta(days=28))
         score, _ = engine._score_recency(job, reference_date=now)
         assert score == pytest.approx(0.25, abs=0.05)
@@ -356,7 +356,7 @@ class TestScoreRecency:
         assert score == pytest.approx(0.5)
 
     def test_naive_datetime_handled(self, engine):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         job = _make_job(posted_date=datetime(2024, 1, 1))
         score, _ = engine._score_recency(job, reference_date=now)
         assert 0.0 <= score <= 1.0
@@ -462,13 +462,13 @@ def test_company_no_match(engine, candidate, job):
 
 
 def test_recency_fresh_job_high_score(engine, candidate, job):
-    job.posted_date = datetime.now(timezone.utc) - timedelta(days=1)
+    job.posted_date = datetime.now(UTC) - timedelta(days=1)
     result = engine.compute_final_score(candidate, job)
     assert result.recency_score > 0.9
 
 
 def test_recency_old_job_low_score(engine, candidate, job):
-    job.posted_date = datetime.now(timezone.utc) - timedelta(days=60)
+    job.posted_date = datetime.now(UTC) - timedelta(days=60)
     result = engine.compute_final_score(candidate, job)
     assert result.recency_score < 0.2
 
@@ -513,7 +513,7 @@ class TestTierClassification:
             min_experience_years=4,
             max_experience_years=8,
             source_platform="employer_ats",
-            posted_date=datetime.now(timezone.utc),
+            posted_date=datetime.now(UTC),
         )
         # Provide high-quality embeddings to boost semantic and skill signals
         emb = [1.0, 0.0, 0.0]
@@ -548,7 +548,7 @@ class TestTierClassification:
             min_experience_years=8,
             max_experience_years=12,
             source_platform="unknown",
-            posted_date=datetime.now(timezone.utc) - timedelta(days=60),
+            posted_date=datetime.now(UTC) - timedelta(days=60),
         )
         result = engine.compute_final_score(cand, job)
         assert result.tier == MatchTier.WEAK.value
@@ -586,7 +586,7 @@ class TestConflictArbitration:
             min_experience_years=4,
             max_experience_years=8,
             source_platform="employer_ats",
-            posted_date=datetime.now(timezone.utc),
+            posted_date=datetime.now(UTC),
         )
         result = engine.compute_final_score(
             cand, job,

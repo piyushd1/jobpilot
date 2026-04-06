@@ -11,13 +11,13 @@ Never blocks pipeline -- only flags issues. Manager decides whether to surface.
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from src.agents.base import AgentShell
-from src.models.schemas import JobDescription, ScoreBreakdown
+from src.models.schemas import ScoreBreakdown
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -191,9 +191,9 @@ class QACriticAgent(AgentShell[QACheckInput, QACheckOutput]):
 
                     if pd is not None:
                         # Ensure timezone-aware comparison
-                        now = datetime.now(timezone.utc)
+                        now = datetime.now(UTC)
                         if pd.tzinfo is None:
-                            pd = pd.replace(tzinfo=timezone.utc)
+                            pd = pd.replace(tzinfo=UTC)
                         if pd > now:
                             flags.append(QAFlag(
                                 severity="warning",

@@ -5,11 +5,12 @@ validates that predicted tiers match expected tiers.
 """
 
 import json
-import pytest
 from pathlib import Path
 
-from src.scoring.engine import MatchScoringEngine
+import pytest
+
 from src.models.schemas import CandidateProfile, JobDescription, WorkExperience
+from src.scoring.engine import MatchScoringEngine
 
 pytestmark = pytest.mark.integration
 

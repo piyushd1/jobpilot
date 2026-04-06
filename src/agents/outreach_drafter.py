@@ -1,5 +1,6 @@
 import litellm
 
+
 class OutreachDrafterAgent:
     """
     Takes a candidate profile, a job description, and a target contact to
@@ -21,7 +22,7 @@ class OutreachDrafterAgent:
 
     async def draft_messages(self, contact: dict, company: str, job_title: str) -> dict:
         print(f"[OutreachDrafter] Drafting variants for {contact['name']} at {company}")
-        
+
         prompt = self.build_developer_prompt(contact, company, job_title)
         try:
             response = await litellm.acompletion(

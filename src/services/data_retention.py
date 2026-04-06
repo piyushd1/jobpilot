@@ -1,7 +1,9 @@
 """Data retention policy enforcement and user data deletion."""
 from __future__ import annotations
+
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
+
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -19,7 +21,7 @@ class DataRetentionService:
 
     def get_expired_before(self, category: str) -> datetime:
         days = getattr(self.policy, f"{category}_days", 180)
-        return datetime.now(timezone.utc) - timedelta(days=days)
+        return datetime.now(UTC) - timedelta(days=days)
 
     async def delete_user_data(self, user_id: str) -> dict[str, int]:
         """GDPR-compliant user data deletion. Returns counts of deleted records."""

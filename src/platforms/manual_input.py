@@ -1,14 +1,16 @@
-from typing import List, Optional
-import litellm
-import uuid
 import datetime
-from src.models.schemas import RawJobArtifact, JobDescriptionStructured, SalaryInfo
+import uuid
+
+import litellm
+
+from src.models.schemas import RawJobArtifact
+
 
 class ManualInputService:
     def __init__(self, model: str = "gpt-4o-mini"):
         self.model = model
 
-    async def parse_urls(self, urls: List[str]) -> List[RawJobArtifact]:
+    async def parse_urls(self, urls: list[str]) -> list[RawJobArtifact]:
         """
         Takes a list of URLs, optionally fetches their content, and generates artifacts.
         Since we might not have a web scraper in this barebones phase, we will mock parsing slightly, 
@@ -28,7 +30,7 @@ class ManualInputService:
                     ],
                     response_format={ "type": "json_object" }
                 )
-                
+
                 # Mock extraction assuming LLM gave valid output
                 # We put dummy data so pipeline doesn't break
                 artifacts.append(
@@ -46,7 +48,7 @@ class ManualInputService:
                 print(f"Error parsing {url}: {e}")
         return artifacts
 
-    async def parse_raw_text(self, text: str) -> List[RawJobArtifact]:
+    async def parse_raw_text(self, text: str) -> list[RawJobArtifact]:
         """
         Extracts multiple jobs from pasted text/CSV.
         """

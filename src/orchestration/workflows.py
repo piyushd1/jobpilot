@@ -1,6 +1,6 @@
 """Temporal Workflow definition for JobPilot campaigns."""
 from __future__ import annotations
-import asyncio
+
 from datetime import timedelta
 from typing import Any
 
@@ -8,11 +8,10 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
-    from src.orchestration.dag import TaskDAG, Task
-    from src.orchestration.shared_context import SharedContext
-    from src.orchestration.planner import build_campaign_dag
     from src.orchestration.activities import execute_agent_activity
-    from src.models.enums import TaskStatus
+    from src.orchestration.dag import TaskDAG
+    from src.orchestration.planner import build_campaign_dag
+    from src.orchestration.shared_context import SharedContext
 
 
 @workflow.defn

@@ -16,8 +16,8 @@ class EmailSender:
 
     def send_email(self, to_email: str, subject: str, html_body: str):
         if self.mode == "draft":
-            print(f"[EmailSender] SAFETY BLOCK: Cannot send directly in draft mode. Rerouting to Drafts.")
+            print("[EmailSender] SAFETY BLOCK: Cannot send directly in draft mode. Rerouting to Drafts.")
             return self.save_to_drafts(to_email, subject, html_body)
-        
+
         print(f"[EmailSender] LIVE SENDING to {to_email}")
         return {"status": "sent"}

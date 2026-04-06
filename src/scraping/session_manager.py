@@ -1,7 +1,10 @@
 """Lightweight HTTP session pool using httpx.AsyncClient with per-domain connection limits."""
 from __future__ import annotations
+
 from typing import Any
+
 import httpx
+
 from src.scraping.proxy_pool import ProxyPoolManager, proxy_pool
 from src.utils.logging import get_logger
 
