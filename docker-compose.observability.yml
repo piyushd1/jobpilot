@@ -1,0 +1,69 @@
+# Observability stack overlay — run with:
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml up
+
+services:
+  # --- Jaeger (Distributed Tracing) ---
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:16686/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- Prometheus (Metrics) ---
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./observability/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+
+  # --- Grafana (Dashboards) ---
+  grafana:
+    image: grafana/grafana:10.3.0
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  # --- Loki (Log Aggregation) ---
+  loki:
+    image: grafana/loki:2.9.4
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+
+  # --- Promtail (Log Shipper) ---
+  promtail:
+    image: grafana/promtail:2.9.4
+    volumes:
+      - /var/log:/var/log
+      - ./observability/promtail.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
