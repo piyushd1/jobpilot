@@ -1,0 +1,125 @@
+{
+  "description": "Ground truth dataset for scoring accuracy validation. Tiers calibrated for no-embedding mode (semantic signal = 0).",
+  "entries": [
+    {
+      "id": 1,
+      "candidate": {
+        "skills_normalized": ["python", "kubernetes", "postgresql", "redis", "aws", "docker", "kafka"],
+        "target_roles": ["Senior Software Engineer", "Backend Lead"],
+        "target_companies": ["Google", "Microsoft"],
+        "target_locations": ["Bangalore", "Remote"],
+        "open_to_remote": true,
+        "total_experience_years": 8.0,
+        "location": "Bangalore, India"
+      },
+      "job": {
+        "title": "Senior Backend Engineer",
+        "company": "TechCorp",
+        "location": "Bangalore, India",
+        "required_skills": ["Python", "Kubernetes", "PostgreSQL", "AWS"],
+        "preferred_skills": ["Kafka", "gRPC", "Go"],
+        "min_experience_years": 5,
+        "max_experience_years": 10,
+        "source_platform": "naukri"
+      },
+      "expected_tier": "partial",
+      "notes": "Good skill match but no embeddings → semantic=0 drags below good threshold."
+    },
+    {
+      "id": 2,
+      "candidate": {
+        "skills_normalized": ["python", "kubernetes", "postgresql", "redis", "aws", "docker", "kafka"],
+        "target_roles": ["Senior Software Engineer"],
+        "target_companies": ["Google"],
+        "target_locations": ["Bangalore"],
+        "open_to_remote": true,
+        "total_experience_years": 8.0,
+        "location": "Bangalore, India"
+      },
+      "job": {
+        "title": "Platform Engineer",
+        "company": "Google",
+        "location": "Bangalore, India",
+        "required_skills": ["Go", "Kubernetes", "gRPC", "PostgreSQL"],
+        "preferred_skills": ["Python", "Terraform", "Prometheus"],
+        "min_experience_years": 6,
+        "max_experience_years": 12,
+        "source_platform": "employer_ats"
+      },
+      "expected_tier": "partial",
+      "notes": "Company match boosts but missing Go/gRPC required + no embeddings."
+    },
+    {
+      "id": 3,
+      "candidate": {
+        "skills_normalized": ["react", "typescript", "node", "css", "html", "next.js"],
+        "target_roles": ["Frontend Engineer"],
+        "target_companies": [],
+        "target_locations": ["Remote"],
+        "open_to_remote": true,
+        "total_experience_years": 3.0,
+        "location": "Delhi, India"
+      },
+      "job": {
+        "title": "Senior Backend Engineer",
+        "company": "TechCorp",
+        "location": "Bangalore, India",
+        "required_skills": ["Python", "Kubernetes", "PostgreSQL", "AWS"],
+        "preferred_skills": ["Kafka", "gRPC"],
+        "min_experience_years": 5,
+        "max_experience_years": 10,
+        "source_platform": "naukri"
+      },
+      "expected_tier": "weak",
+      "notes": "Frontend skills don't match backend role. Under-experienced."
+    },
+    {
+      "id": 4,
+      "candidate": {
+        "skills_normalized": ["python", "django", "postgresql", "docker", "redis"],
+        "target_roles": ["Python Developer", "Backend Developer"],
+        "target_companies": [],
+        "target_locations": ["Mumbai"],
+        "open_to_remote": false,
+        "total_experience_years": 2.0,
+        "location": "Mumbai, India"
+      },
+      "job": {
+        "title": "Junior Python Developer",
+        "company": "Acme Corp",
+        "location": "Mumbai, India",
+        "required_skills": ["Python", "Django", "PostgreSQL"],
+        "preferred_skills": ["Docker", "Redis"],
+        "min_experience_years": 0,
+        "max_experience_years": 3,
+        "source_platform": "naukri"
+      },
+      "expected_tier": "partial",
+      "notes": "Skills match perfectly, exp in range, location match. But no embeddings and no company pref."
+    },
+    {
+      "id": 5,
+      "candidate": {
+        "skills_normalized": ["python", "kubernetes", "postgresql", "redis", "aws", "docker"],
+        "target_roles": ["Senior Software Engineer"],
+        "target_companies": ["Stripe"],
+        "target_locations": ["Remote"],
+        "open_to_remote": true,
+        "total_experience_years": 8.0,
+        "location": "Bangalore, India"
+      },
+      "job": {
+        "title": "Staff Software Engineer",
+        "company": "Microsoft",
+        "location": "Bangalore, India",
+        "required_skills": ["C#", ".NET", "Azure", "Kubernetes"],
+        "preferred_skills": ["Python", "Terraform", "Go"],
+        "min_experience_years": 10,
+        "max_experience_years": 18,
+        "source_platform": "employer_ats"
+      },
+      "expected_tier": "weak",
+      "notes": "Missing core skills (C#, .NET, Azure). Under-experienced. No company match."
+    }
+  ]
+}
