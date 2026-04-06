@@ -27,7 +27,7 @@ const mockJobs = [
 export default function ShortlistView() {
   const [jobs, setJobs] = useState(mockJobs);
 
-  const handleDecision = (id: number, decision: string) => {
+  const handleDecision = (id: number) => {
     // In real app, call API to save decision securely
     setJobs(jobs.filter(j => j.id !== id));
   };
@@ -63,10 +63,10 @@ export default function ShortlistView() {
             </div>
             
             <div className="action-buttons">
-              <button className="btn btn-success" onClick={() => handleDecision(job.id, 'APPROVE')}>
+               <button className="btn btn-success" onClick={() => handleDecision(job.id)}>
                 Approve & Apply
               </button>
-              <button className="btn btn-danger" onClick={() => handleDecision(job.id, 'REJECT')}>
+               <button className="btn btn-danger" onClick={() => handleDecision(job.id)}>
                 Reject
               </button>
             </div>
