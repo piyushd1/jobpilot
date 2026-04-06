@@ -1,0 +1,51 @@
+# Platform adapter configuration.
+# Defines retrieval strategy order per platform.
+
+platforms:
+  naukri:
+    display_name: Naukri.com
+    enabled: true
+    strategies:
+      - api
+      - alert_ingestion
+      - employer_ats
+      - browser_automation
+      - manual_input
+    rate_limit:
+      requests_per_minute: 20
+      cooldown_seconds: 3
+
+  indeed:
+    display_name: Indeed
+    enabled: true
+    strategies:
+      - licensed_vendor
+      - alert_ingestion
+      - employer_ats
+      - manual_input
+    rate_limit:
+      requests_per_minute: 10
+      cooldown_seconds: 5
+
+  linkedin:
+    display_name: LinkedIn
+    enabled: true
+    strategies:
+      - licensed_vendor
+      - alert_ingestion
+      - employer_ats
+      - manual_input
+    rate_limit:
+      requests_per_minute: 5
+      cooldown_seconds: 10
+
+  iimjobs:
+    display_name: IIMJobs
+    enabled: true
+    strategies:
+      - api
+      - employer_ats
+      - manual_input
+    rate_limit:
+      requests_per_minute: 15
+      cooldown_seconds: 4

@@ -1,0 +1,25 @@
+# Default scoring weights for the multi-signal matching engine.
+# Users can override these via campaign preferences.
+
+weights:
+  skills: 0.30
+  title_alignment: 0.15
+  experience_fit: 0.15
+  semantic_similarity: 0.10
+  company_preference: 0.10
+  location_fit: 0.08
+  recency: 0.07
+  source_confidence: 0.05
+
+# Score tier thresholds
+tiers:
+  strong: 0.80
+  good: 0.60
+  partial: 0.40
+  weak: 0.0
+
+# Conflict arbitration
+arbitration:
+  # If semantic > this but hard skill overlap < skill_floor → cap tier at GOOD
+  semantic_ceiling: 0.80
+  skill_floor: 0.50
