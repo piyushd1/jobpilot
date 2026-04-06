@@ -242,22 +242,32 @@ class TestExactHashMatching:
 
     def test_normalized_duplicates_deduplicated(self):
         job1 = _make_job(
-            title="Sr. Software Engineer", company="Google Inc.", location="Bangalore, IN",
+            title="Sr. Software Engineer",
+            company="Google Inc.",
+            location="Bangalore, IN",
         )
         job2 = _make_job(
-            title="Senior Software Engineer", company="Google Inc", location="Bengaluru, India",
+            title="Senior Software Engineer",
+            company="Google Inc",
+            location="Bengaluru, India",
         )
         result = deduplicate_jobs([job1, job2])
         assert len(result) == 1
 
     def test_richer_record_preferred(self):
         job_sparse = _make_job(
-            title="Software Engineer", company="Google", location="NYC",
-            description=None, required_skills=[],
+            title="Software Engineer",
+            company="Google",
+            location="NYC",
+            description=None,
+            required_skills=[],
         )
         job_rich = _make_job(
-            title="Software Engineer", company="Google", location="NYC",
-            description="Great opportunity", required_skills=["Python", "Go"],
+            title="Software Engineer",
+            company="Google",
+            location="NYC",
+            description="Great opportunity",
+            required_skills=["Python", "Go"],
             preferred_skills=["Kubernetes"],
         )
         result = deduplicate_jobs([job_sparse, job_rich])
@@ -274,12 +284,16 @@ class TestExactHashMatching:
     def test_employer_url_preserved(self):
         jobs = [
             JobDescription(
-                title="Software Engineer", company="Google", location="Bangalore",
+                title="Software Engineer",
+                company="Google",
+                location="Bangalore",
                 required_skills=["Python"],
                 application_url_board="https://board.com/123",
             ),
             JobDescription(
-                title="Software Engineer", company="Google Inc.", location="Bangalore, India",
+                title="Software Engineer",
+                company="Google Inc.",
+                location="Bangalore, India",
                 required_skills=["Python", "Go"],
                 application_url_employer="https://google.com/careers/123",
             ),
@@ -297,22 +311,30 @@ class TestExactHashMatching:
 class TestFuzzyMatching:
     def test_near_duplicate_titles_merged(self):
         job1 = _make_job(
-            title="Software Engineer - Backend", company="Acme Corp", location="NYC",
+            title="Software Engineer - Backend",
+            company="Acme Corp",
+            location="NYC",
         )
         job2 = _make_job(
-            title="Software Engineer, Backend", company="Acme Corp", location="NYC",
+            title="Software Engineer, Backend",
+            company="Acme Corp",
+            location="NYC",
         )
         result = deduplicate_jobs([job1, job2])
         assert len(result) == 1
 
     def test_employer_url_preferred_in_merge(self):
         job_board = _make_job(
-            title="Software Engineer", company="Acme Corp", location="NYC",
+            title="Software Engineer",
+            company="Acme Corp",
+            location="NYC",
             application_url_board="https://linkedin.com/jobs/123",
             application_url_employer=None,
         )
         job_employer = _make_job(
-            title="Software Engineer", company="Acme Corp", location="NYC",
+            title="Software Engineer",
+            company="Acme Corp",
+            location="NYC",
             application_url_board=None,
             application_url_employer="https://acme.com/careers/swe",
         )
@@ -356,11 +378,15 @@ class TestNonDuplicateCases:
     def test_different_jobs_not_merged(self):
         jobs = [
             JobDescription(
-                title="Software Engineer", company="Google", location="Bangalore",
+                title="Software Engineer",
+                company="Google",
+                location="Bangalore",
                 required_skills=["Python"],
             ),
             JobDescription(
-                title="Data Scientist", company="Microsoft", location="Seattle",
+                title="Data Scientist",
+                company="Microsoft",
+                location="Seattle",
                 required_skills=["Python"],
             ),
         ]
@@ -382,12 +408,16 @@ class TestNonDuplicateCases:
 class TestCrossplatformUrlDedup:
     def test_same_employer_url_deduplicated(self):
         job1 = _make_job(
-            title="Frontend Engineer", company="Stripe", location="SF, US",
+            title="Frontend Engineer",
+            company="Stripe",
+            location="SF, US",
             application_url_employer="https://stripe.com/careers/frontend",
             source_platform="linkedin",
         )
         job2 = _make_job(
-            title="Frontend Developer", company="Stripe Inc.", location="San Francisco, US",
+            title="Frontend Developer",
+            company="Stripe Inc.",
+            location="San Francisco, US",
             application_url_employer="https://stripe.com/careers/frontend",
             source_platform="indeed",
         )
@@ -396,11 +426,15 @@ class TestCrossplatformUrlDedup:
 
     def test_no_employer_url_not_affected(self):
         job1 = _make_job(
-            title="Engineer A", company="Acme A", location="NYC",
+            title="Engineer A",
+            company="Acme A",
+            location="NYC",
             application_url_employer=None,
         )
         job2 = _make_job(
-            title="Engineer B", company="Acme B", location="London",
+            title="Engineer B",
+            company="Acme B",
+            location="London",
             application_url_employer=None,
         )
         result = deduplicate_jobs([job1, job2])
@@ -415,12 +449,19 @@ class TestCrossplatformUrlDedup:
 class TestMergeBehavior:
     def test_backfill_missing_fields(self):
         job1 = _make_job(
-            title="Software Engineer", company="Google", location="NYC, US",
-            description="Build amazing things", salary_min=None,
+            title="Software Engineer",
+            company="Google",
+            location="NYC, US",
+            description="Build amazing things",
+            salary_min=None,
         )
         job2 = _make_job(
-            title="Software Engineer", company="Google", location="NYC, US",
-            description=None, salary_min=120000, salary_max=180000,
+            title="Software Engineer",
+            company="Google",
+            location="NYC, US",
+            description=None,
+            salary_min=120000,
+            salary_max=180000,
         )
         result = deduplicate_jobs([job1, job2])
         assert len(result) == 1

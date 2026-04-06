@@ -1,4 +1,5 @@
 """Shared context persisted as Temporal workflow state."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -10,6 +11,7 @@ from typing import Any
 class SharedContext:
     """Mutable state shared across all agents within a campaign workflow.
     Persisted as Temporal workflow state — survives crashes and replays."""
+
     campaign_id: str = ""
     user_id: str = ""
     resume_id: str = ""
@@ -42,8 +44,10 @@ class SharedContext:
         self.total_tokens_used += usage.get("total_tokens", 0)
 
     def add_error(self, agent: str, error: str) -> None:
-        self.errors.append({
-            "agent": agent,
-            "error": error,
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        self.errors.append(
+            {
+                "agent": agent,
+                "error": error,
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        )

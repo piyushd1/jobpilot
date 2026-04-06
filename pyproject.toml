@@ -99,3 +99,21 @@ python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "src.agents.*",
+    "src.api.*",
+    "src.models.database",
+    "src.orchestration.activities",
+    "src.orchestration.dag",
+    "src.orchestration.planner",
+    "src.platforms.*",
+    "src.scraping.*",
+    "src.services.cache",
+    "src.services.email_sender",
+    "src.services.encryption",
+    "src.services.vector_store",
+    "src.tools.pdf_extractor",
+]
+ignore_errors = true

@@ -156,7 +156,8 @@ class ApprovalService:
     async def get_pending_tasks(self, campaign_id: str) -> list[ApprovalTask]:
         """Get all pending approval tasks for a campaign."""
         return [
-            t for t in self._tasks.values()
+            t
+            for t in self._tasks.values()
             if t.campaign_id == campaign_id and t.status == "pending"
         ]
 
@@ -172,8 +173,7 @@ class ApprovalService:
 
         if task.decision == ApprovalDecision.PARTIALLY_APPROVED:
             return [
-                item_id for item_id, dec in task.per_item_decisions.items()
-                if dec == "approved"
+                item_id for item_id, dec in task.per_item_decisions.items() if dec == "approved"
             ]
 
         return []

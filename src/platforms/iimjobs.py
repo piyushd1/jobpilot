@@ -23,7 +23,7 @@ class IIMJobsAdapter(PlatformAdapter):
                 location=location,
                 description_raw="Exclusive opportunity...",
                 application_url="https://www.iimjobs.com/j/123",
-                scraped_at=datetime.datetime.utcnow().isoformat()
+                scraped_at=datetime.datetime.utcnow().isoformat(),
             )
         ]
 
@@ -36,5 +36,5 @@ class IIMJobsAdapter(PlatformAdapter):
             company="Elite Finance",
             description_raw="Detailed IIMJobs JD...",
             application_url=job_url,
-            scraped_at=datetime.datetime.utcnow().isoformat()
+            scraped_at=datetime.datetime.utcnow().isoformat(),
         )

@@ -23,7 +23,7 @@ class LinkedInAdapter(PlatformAdapter):
                 location=location,
                 description_raw="We are hiring...",
                 application_url="https://www.linkedin.com/jobs/view/123",
-                scraped_at=datetime.datetime.utcnow().isoformat()
+                scraped_at=datetime.datetime.utcnow().isoformat(),
             )
         ]
 
@@ -36,5 +36,5 @@ class LinkedInAdapter(PlatformAdapter):
             company="TechCorp Global",
             description_raw="LinkedIn detailed JD...",
             application_url=job_url,
-            scraped_at=datetime.datetime.utcnow().isoformat()
+            scraped_at=datetime.datetime.utcnow().isoformat(),
         )

@@ -54,9 +54,7 @@ class RedisCache:
         else:
             await self.client.set(key, value)
 
-    async def set_json(
-        self, key: str, value: Any, expire_seconds: int | None = None
-    ) -> None:
+    async def set_json(self, key: str, value: Any, expire_seconds: int | None = None) -> None:
         """Serialize and set a JSON value with optional TTL."""
         await self.set(key, json.dumps(value, default=str), expire_seconds)
 

@@ -31,12 +31,20 @@ def candidate():
         open_to_remote=True,
         total_experience_years=8.0,
         work_experience=[
-            WorkExperience(company="Acme Corp", title="Senior Software Engineer",
-                          start_date="2020-01", is_current=True,
-                          skills_used=["Python", "Kubernetes", "PostgreSQL"]),
-            WorkExperience(company="StartupXYZ", title="Software Engineer",
-                          start_date="2016-06", end_date="2019-12",
-                          skills_used=["Go", "Redis", "Docker"]),
+            WorkExperience(
+                company="Acme Corp",
+                title="Senior Software Engineer",
+                start_date="2020-01",
+                is_current=True,
+                skills_used=["Python", "Kubernetes", "PostgreSQL"],
+            ),
+            WorkExperience(
+                company="StartupXYZ",
+                title="Software Engineer",
+                start_date="2016-06",
+                end_date="2019-12",
+                skills_used=["Go", "Redis", "Docker"],
+            ),
         ],
     )
 

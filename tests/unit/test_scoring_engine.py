@@ -69,10 +69,22 @@ def candidate():
         full_name="Jane Doe",
         location="Bangalore, India",
         skills=[
-            "Python", "Kubernetes", "PostgreSQL", "Redis", "AWS", "Docker", "Kafka",
+            "Python",
+            "Kubernetes",
+            "PostgreSQL",
+            "Redis",
+            "AWS",
+            "Docker",
+            "Kafka",
         ],
         skills_normalized=[
-            "python", "kubernetes", "postgresql", "redis", "aws", "docker", "kafka",
+            "python",
+            "kubernetes",
+            "postgresql",
+            "redis",
+            "aws",
+            "docker",
+            "kafka",
         ],
         target_roles=["Senior Software Engineer", "Backend Lead"],
         target_companies=["Google", "Microsoft"],
@@ -164,7 +176,10 @@ class TestScoreSkills:
         job = _make_job(required_skills=["Python"], preferred_skills=[])
         emb = [1.0, 0.0, 0.0]
         score, _ = engine._score_skills(
-            cand, job, candidate_embedding=emb, job_skills_embedding=emb,
+            cand,
+            job,
+            candidate_embedding=emb,
+            job_skills_embedding=emb,
         )
         # Jaccard 1.0, adj 0, semantic 1.0 -> 0.40*1 + 0.40*0 + 0.20*1 = 0.60
         assert score == pytest.approx(0.60, abs=0.05)
@@ -200,7 +215,10 @@ class TestScoreTitleAlignment:
         job = _make_job(title="Any")
         emb = [0.5, 0.5, 0.5]
         score, _ = engine._score_title_alignment(
-            cand, job, candidate_title_embedding=emb, job_title_embedding=emb,
+            cand,
+            job,
+            candidate_title_embedding=emb,
+            job_title_embedding=emb,
         )
         assert score == pytest.approx(1.0, abs=0.01)
 
@@ -310,7 +328,9 @@ class TestScoreLocationFit:
 
     def test_location_mismatch_open_remote(self, engine):
         cand = _make_candidate(
-            location="London", target_locations=[], open_to_remote=True,
+            location="London",
+            target_locations=[],
+            open_to_remote=True,
         )
         job = _make_job(is_remote=False, location="New York")
         score, _ = engine._score_location_fit(cand, job)
@@ -318,7 +338,9 @@ class TestScoreLocationFit:
 
     def test_location_mismatch_not_remote(self, engine):
         cand = _make_candidate(
-            location="London", target_locations=[], open_to_remote=False,
+            location="London",
+            target_locations=[],
+            open_to_remote=False,
         )
         job = _make_job(is_remote=False, location="New York")
         score, _ = engine._score_location_fit(cand, job)
@@ -493,10 +515,22 @@ class TestTierClassification:
     def test_strong_tier(self, engine):
         cand = _make_candidate(
             skills=[
-                "Python", "Kubernetes", "PostgreSQL", "AWS", "Docker", "Kafka", "gRPC",
+                "Python",
+                "Kubernetes",
+                "PostgreSQL",
+                "AWS",
+                "Docker",
+                "Kafka",
+                "gRPC",
             ],
             skills_normalized=[
-                "python", "kubernetes", "postgresql", "aws", "docker", "kafka", "grpc",
+                "python",
+                "kubernetes",
+                "postgresql",
+                "aws",
+                "docker",
+                "kafka",
+                "grpc",
             ],
             target_roles=["Senior Software Engineer"],
             target_companies=["Acme Corp"],
@@ -518,7 +552,8 @@ class TestTierClassification:
         # Provide high-quality embeddings to boost semantic and skill signals
         emb = [1.0, 0.0, 0.0]
         result = engine.compute_final_score(
-            cand, job,
+            cand,
+            job,
             candidate_skills_embedding=emb,
             job_skills_embedding=emb,
             candidate_title_embedding=emb,
@@ -589,7 +624,8 @@ class TestConflictArbitration:
             posted_date=datetime.now(UTC),
         )
         result = engine.compute_final_score(
-            cand, job,
+            cand,
+            job,
             profile_embedding=[1.0, 0.0, 0.0],
             jd_embedding=[0.95, 0.05, 0.0],
         )

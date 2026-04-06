@@ -1,4 +1,5 @@
 """Data retention policy enforcement and user data deletion."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,12 +9,14 @@ from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+
 @dataclass
 class RetentionPolicy:
     resume_days: int = 90
     campaign_days: int = 180
     audit_log_days: int = 365
     user_action_days: int = 180
+
 
 class DataRetentionService:
     def __init__(self, policy: RetentionPolicy | None = None):
@@ -44,5 +47,6 @@ class DataRetentionService:
         logger.info("Enforcing data retention policy")
         # In production: query each table for records older than policy
         return {"expired_records_cleaned": 0}
+
 
 data_retention = DataRetentionService()

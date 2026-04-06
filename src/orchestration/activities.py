@@ -1,4 +1,5 @@
 """Temporal Activity definitions wrapping agent execution."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -29,6 +30,7 @@ def _get_agent(name: str):
     # Agents are registered as they are implemented
     try:
         from src.agents.resume_parser import ResumeParserAgent
+
         registry["resume_parser"] = ResumeParserAgent
     except ImportError:
         pass

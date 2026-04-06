@@ -6,12 +6,13 @@ class OutreachDrafterAgent:
     Takes a candidate profile, a job description, and a target contact to
     draft highly personalized, context-aware networking messages in 5 templates.
     """
+
     def __init__(self, model="gpt-4o"):
         self.model = model
 
     def build_developer_prompt(self, contact, company, job_title):
         return f"""
-        Draft 5 separate message variants to {contact['name']} ({contact['role']}) at {company} regarding the {job_title} role.
+        Draft 5 separate message variants to {contact["name"]} ({contact["role"]}) at {company} regarding the {job_title} role.
         Return JSON with keys:
         - linkedin_connection (max 300 chars, casual, professional)
         - recruiter_intro (4-6 lines highlighting top 2 matched skills)
@@ -28,12 +29,15 @@ class OutreachDrafterAgent:
             response = await litellm.acompletion(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are an elite executive recruiter drafting concise candidate outreach messages."},
-                    {"role": "user", "content": prompt}
+                    {
+                        "role": "system",
+                        "content": "You are an elite executive recruiter drafting concise candidate outreach messages.",
+                    },
+                    {"role": "user", "content": prompt},
                 ],
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
-            return eval(response.choices[0].message.content) # Assuming JSON structured response
+            return eval(response.choices[0].message.content)  # Assuming JSON structured response
         except Exception as e:
             print(f"Error drafting messages: {e}")
             # deterministic fallback

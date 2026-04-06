@@ -28,14 +28,34 @@ SAMPLE_ROLES = [
 ]
 
 SAMPLE_COMPANIES = [
-    "Google", "Microsoft", "Stripe", "Amazon", "Meta",
-    "Flipkart", "Swiggy", "Razorpay", "Zerodha", "CRED",
+    "Google",
+    "Microsoft",
+    "Stripe",
+    "Amazon",
+    "Meta",
+    "Flipkart",
+    "Swiggy",
+    "Razorpay",
+    "Zerodha",
+    "CRED",
 ]
 
 SAMPLE_SKILLS = [
-    "Python", "Go", "Java", "TypeScript", "Kubernetes",
-    "PostgreSQL", "Redis", "Kafka", "Docker", "AWS",
-    "React", "Node.js", "Terraform", "gRPC", "GraphQL",
+    "Python",
+    "Go",
+    "Java",
+    "TypeScript",
+    "Kubernetes",
+    "PostgreSQL",
+    "Redis",
+    "Kafka",
+    "Docker",
+    "AWS",
+    "React",
+    "Node.js",
+    "Terraform",
+    "gRPC",
+    "GraphQL",
 ]
 
 

@@ -3,9 +3,11 @@ from pydantic import BaseModel
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
+
 class ApprovalDecision(BaseModel):
     decision: str  # e.g., "APPROVED", "REJECTED"
     notes: str = ""
+
 
 @router.post("/{approval_id}/decision")
 async def submit_decision(approval_id: str, decision: ApprovalDecision):
@@ -16,5 +18,5 @@ async def submit_decision(approval_id: str, decision: ApprovalDecision):
         "status": "success",
         "approval_id": approval_id,
         "decision": decision.decision,
-        "message": "Decision recorded. Temporal workflow signaled."
+        "message": "Decision recorded. Temporal workflow signaled.",
     }

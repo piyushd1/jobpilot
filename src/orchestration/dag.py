@@ -1,4 +1,5 @@
 """Task DAG engine for managing execution dependencies."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -28,8 +29,10 @@ class Task:
     completed_at: datetime | None = None
     cost_tokens_used: int | None = None
 
+
 class TaskDAG:
     """Directed acyclic graph of tasks with dependency resolution."""
+
     def __init__(self):
         self._tasks: dict[str, Task] = {}
 

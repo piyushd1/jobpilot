@@ -1,4 +1,5 @@
 """Lightweight HTTP session pool using httpx.AsyncClient with per-domain connection limits."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -16,8 +17,11 @@ DEFAULT_HEADERS = {
     "Accept-Encoding": "gzip, deflate, br",
 }
 
+
 class SessionManager:
-    def __init__(self, proxy_pool_mgr: ProxyPoolManager | None = None, max_connections_per_domain: int = 5) -> None:
+    def __init__(
+        self, proxy_pool_mgr: ProxyPoolManager | None = None, max_connections_per_domain: int = 5
+    ) -> None:
         self._proxy_pool = proxy_pool_mgr or proxy_pool
         self._clients: dict[str, httpx.AsyncClient] = {}
         self._max_connections = max_connections_per_domain
@@ -43,9 +47,12 @@ class SessionManager:
         self._clients[domain] = client
         return client
 
-    async def request(self, method: str, url: str, domain: str = "", **kwargs: Any) -> httpx.Response:
+    async def request(
+        self, method: str, url: str, domain: str = "", **kwargs: Any
+    ) -> httpx.Response:
         if not domain:
             from urllib.parse import urlparse
+
             domain = urlparse(url).netloc
         client = await self.get_client(domain)
         return await client.request(method, url, **kwargs)
@@ -54,5 +61,6 @@ class SessionManager:
         for client in self._clients.values():
             await client.aclose()
         self._clients.clear()
+
 
 session_manager = SessionManager()

@@ -6,6 +6,7 @@ distributed traces and metrics export.
 
 import logging
 import sys
+from typing import cast
 
 import structlog
 
@@ -44,7 +45,7 @@ def setup_logging() -> None:
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
     """Get a named logger instance."""
-    return structlog.get_logger(name)
+    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
 
 
 def setup_opentelemetry() -> None:
@@ -60,11 +61,13 @@ def setup_opentelemetry() -> None:
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
-        resource = Resource.create({
-            "service.name": "jobpilot",
-            "service.version": "0.1.0",
-            "deployment.environment": settings.app_env,
-        })
+        resource = Resource.create(
+            {
+                "service.name": "jobpilot",
+                "service.version": "0.1.0",
+                "deployment.environment": settings.app_env,
+            }
+        )
 
         # Tracing
         tracer_provider = TracerProvider(resource=resource)
@@ -72,9 +75,7 @@ def setup_opentelemetry() -> None:
         # In production, use OTLP exporter to Jaeger/OTel Collector
         # For dev, use console exporter
         if settings.is_dev:
-            tracer_provider.add_span_processor(
-                BatchSpanProcessor(ConsoleSpanExporter())
-            )
+            tracer_provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
         trace.set_tracer_provider(tracer_provider)
 

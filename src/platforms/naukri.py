@@ -26,7 +26,7 @@ class NaukriAdapter(PlatformAdapter):
                 location=location,
                 description_raw="We are looking for a skilled professional...",
                 application_url="https://www.naukri.com/job-listings-123",
-                scraped_at=datetime.datetime.utcnow().isoformat()
+                scraped_at=datetime.datetime.utcnow().isoformat(),
             )
         ]
 
@@ -40,5 +40,5 @@ class NaukriAdapter(PlatformAdapter):
             company="MockTech India Pvt Ltd",
             description_raw="Detailed description from Apify extraction...",
             application_url=job_url,
-            scraped_at=datetime.datetime.utcnow().isoformat()
+            scraped_at=datetime.datetime.utcnow().isoformat(),
         )

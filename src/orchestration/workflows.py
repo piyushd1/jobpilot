@@ -1,4 +1,5 @@
 """Temporal Workflow definition for JobPilot campaigns."""
+
 from __future__ import annotations
 
 from datetime import timedelta
@@ -75,8 +76,10 @@ class JobPilotWorkflow:
                 if self._dag.has_failed():
                     break
                 await workflow.wait_condition(
-                    lambda: bool(self._dag and self._dag.get_ready_tasks()) or
-                            (self._dag is not None and self._dag.all_terminal()),
+                    lambda: (
+                        bool(self._dag and self._dag.get_ready_tasks())
+                        or (self._dag is not None and self._dag.all_terminal())
+                    ),
                     timeout=timedelta(minutes=30),
                 )
                 continue

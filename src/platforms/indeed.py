@@ -24,7 +24,7 @@ class IndeedAdapter(PlatformAdapter):
                 location=location,
                 description_raw="Join our dynamic team...",
                 application_url="https://www.indeed.com/viewjob?jk=123",
-                scraped_at=datetime.datetime.utcnow().isoformat()
+                scraped_at=datetime.datetime.utcnow().isoformat(),
             )
         ]
 
@@ -38,5 +38,5 @@ class IndeedAdapter(PlatformAdapter):
             company="Global Solutions Inc",
             description_raw="Extracted indeed description...",
             application_url=job_url,
-            scraped_at=datetime.datetime.utcnow().isoformat()
+            scraped_at=datetime.datetime.utcnow().isoformat(),
         )

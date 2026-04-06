@@ -129,8 +129,8 @@ _NON_HTTPS_URL_RE = re.compile(r"^http://", re.IGNORECASE)
 # ---------------------------------------------------------------------------
 
 _SALARY_MAX_INR: dict[str, int] = {
-    "entry": 30_00_000,   # 30 LPA
-    "mid": 50_00_000,     # 50 LPA
+    "entry": 30_00_000,  # 30 LPA
+    "mid": 50_00_000,  # 50 LPA
     "senior": 80_00_000,  # 80 LPA
     "staff": 1_20_00_000,  # 120 LPA
 }
@@ -197,9 +197,7 @@ class JobRiskDetector:
 
         return assessment
 
-    def assess_batch(
-        self, jobs: list[JobDescription]
-    ) -> list[RiskAssessment]:
+    def assess_batch(self, jobs: list[JobDescription]) -> list[RiskAssessment]:
         """Evaluate a batch of job postings."""
         return [self.assess(job) for job in jobs]
 
@@ -330,9 +328,10 @@ class JobRiskDetector:
             "limited",
             "group",
         ]
-        looks_enterprise = any(kw in company_lower for kw in enterprise_hints) or len(
-            (job.company or "").split()
-        ) > 1
+        looks_enterprise = (
+            any(kw in company_lower for kw in enterprise_hints)
+            or len((job.company or "").split()) > 1
+        )
 
         if looks_enterprise:
             assessment.flags.append(
@@ -355,9 +354,7 @@ class JobRiskDetector:
                 return level
         return "entry"
 
-    def _check_salary_implausible(
-        self, job: JobDescription, assessment: RiskAssessment
-    ) -> None:
+    def _check_salary_implausible(self, job: JobDescription, assessment: RiskAssessment) -> None:
         """Flag salary ranges that exceed reasonable benchmarks."""
         if job.salary_max is None and job.salary_min is None:
             return
@@ -389,9 +386,7 @@ class JobRiskDetector:
             )
 
     @staticmethod
-    def _check_vague_description(
-        job: JobDescription, assessment: RiskAssessment
-    ) -> None:
+    def _check_vague_description(job: JobDescription, assessment: RiskAssessment) -> None:
         """Flag postings with very short or entirely generic descriptions."""
         desc = (job.description or "").strip()
 
@@ -423,15 +418,9 @@ class JobRiskDetector:
                 return
 
     @staticmethod
-    def _check_suspicious_url(
-        job: JobDescription, assessment: RiskAssessment
-    ) -> None:
+    def _check_suspicious_url(job: JobDescription, assessment: RiskAssessment) -> None:
         """Flag application URLs that use shorteners or plain HTTP."""
-        urls = [
-            u
-            for u in [job.application_url_board, job.application_url_employer]
-            if u
-        ]
+        urls = [u for u in [job.application_url_board, job.application_url_employer] if u]
         for url in urls:
             if _URL_SHORTENER_RE.search(url):
                 assessment.flags.append(
