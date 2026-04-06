@@ -1,0 +1,60 @@
+groups:
+  - name: jobpilot_alerts
+    rules:
+      # Source success rate drops below 70%
+      - alert: SourceSuccessRateLow
+        expr: rate(jobpilot_source_success_rate[5m]) < 0.70
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Source success rate below 70%"
+          description: "Platform {{ $labels.platform }} success rate is {{ $value | humanizePercentage }}."
+
+      # LLM API error rate exceeds 5%
+      - alert: LLMErrorRateHigh
+        expr: rate(jobpilot_error_total{service="llm"}[5m]) / rate(jobpilot_llm_tokens_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM API error rate above 5%"
+          description: "LLM errors at {{ $value | humanizePercentage }} over last 5 minutes."
+
+      # Campaign duration exceeds 4 hours
+      - alert: CampaignDurationExceeded
+        expr: jobpilot_campaign_duration_seconds > 14400
+        labels:
+          severity: warning
+        annotations:
+          summary: "Campaign running longer than 4 hours"
+          description: "Campaign {{ $labels.campaign_id }} has been running for {{ $value | humanizeDuration }}."
+
+      # Cost per campaign anomalous spike (> $5)
+      - alert: CampaignCostSpike
+        expr: jobpilot_llm_cost_usd_total > 5.0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Campaign LLM cost exceeds $5"
+          description: "Campaign {{ $labels.campaign_id }} cost is ${{ $value }}."
+
+      # High challenge encounter rate
+      - alert: ChallengeEncounterRateHigh
+        expr: rate(jobpilot_challenge_encounter_total[1h]) > 5
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frequent CAPTCHA/challenge encounters"
+          description: "Platform {{ $labels.platform }} encountering {{ $value }} challenges/hour."
+
+      # General high error rate
+      - alert: HighErrorRate
+        expr: rate(jobpilot_error_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Service {{ $labels.service }} error rate: {{ $value }}/s."

@@ -1,0 +1,52 @@
+name: Weekly Scoring Validation
+
+on:
+  schedule:
+    # Runs every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  scoring-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run scoring validation tests
+        id: scoring
+        run: |
+          pytest tests/scoring_validation -v --tb=long --junitxml=junit-scoring.xml 2>&1 | tee scoring-output.txt
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weekly-scoring-results
+          path: |
+            junit-scoring.xml
+            scoring-output.txt
+      - name: Prepare issue body on failure
+        if: failure()
+        run: |
+          echo "## Scoring Validation Regression Detected" > issue-body.md
+          echo "" >> issue-body.md
+          echo "The weekly scoring validation run has failed, indicating a potential regression in scoring accuracy." >> issue-body.md
+          echo "" >> issue-body.md
+          echo "**Run:** [View workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> issue-body.md
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> issue-body.md
+          echo "**Commit:** \`${{ github.sha }}\`" >> issue-body.md
+          echo "" >> issue-body.md
+          echo "### Test Output" >> issue-body.md
+          echo '```' >> issue-body.md
+          tail -50 scoring-output.txt >> issue-body.md
+          echo '```' >> issue-body.md
+      - name: Create issue on failure
+        if: failure()
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Scoring Validation Regression - ${{ github.run_id }}"
+          content-filepath: issue-body.md
+          labels: bug,scoring,automated
