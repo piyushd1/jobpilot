@@ -63,11 +63,13 @@ class MatchTier(StrEnum):
 class RetrievalStrategy(StrEnum):
     """Job discovery retrieval strategies, in preference order."""
 
+    OFFICIAL_API = "official_api"
     API = "api"
     LICENSED_VENDOR = "licensed_vendor"
     ALERT_INGESTION = "alert_ingestion"
     EMPLOYER_ATS = "employer_ats"
     BROWSER_AUTOMATION = "browser_automation"
+    BROWSER_ALLOWLISTED = "browser_allowlisted"
     MANUAL_INPUT = "manual_input"
 
 
