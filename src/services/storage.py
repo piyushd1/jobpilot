@@ -1,66 +1,79 @@
-import os
-import boto3
-from botocore.exceptions import ClientError
-from cryptography.fernet import Fernet
-import io
+"""MinIO/S3 object storage wrapper for resume PDFs and reports."""
 
-class MinioStorage:
-    def __init__(self):
-        self.endpoint_url = os.getenv("MINIO_ENDPOINT_URL", "http://localhost:9000")
-        self.access_key = os.getenv("MINIO_ACCESS_KEY", "admin")
-        self.secret_key = os.getenv("MINIO_SECRET_KEY", "password123")
-        self.bucket_name = "jobpilot-resumes"
-        
-        # In a real setup, this would be fetched from Vault or secure env
-        # Key must be 32 url-safe base64-encoded bytes
-        key = os.getenv("ENCRYPTION_KEY", Fernet.generate_key().decode('utf-8'))
-        self.cipher_suite = Fernet(key.encode('utf-8'))
+from __future__ import annotations
 
-        self.s3_client = boto3.client(
-            's3',
-            endpoint_url=self.endpoint_url,
-            aws_access_key_id=self.access_key,
-            aws_secret_access_key=self.secret_key
+from io import BytesIO
+
+from minio import Minio
+
+from src.config.settings import settings
+from src.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+
+class ObjectStorage:
+    """MinIO client wrapper for file upload/download."""
+
+    def __init__(self) -> None:
+        self._client: Minio | None = None
+
+    def connect(self) -> None:
+        """Initialize the MinIO client."""
+        self._client = Minio(
+            endpoint=settings.minio_endpoint,
+            access_key=settings.minio_access_key,
+            secret_key=settings.minio_secret_key,
+            secure=settings.minio_secure,
         )
+        self._ensure_bucket()
+        logger.info("Connected to MinIO", endpoint=settings.minio_endpoint)
 
-    def upload_file(self, file_content: bytes, object_name: str) -> str:
-        """Encrypts and uploads a file to MinIO, returns the object path."""
-        try:
-            encrypted_content = self.cipher_suite.encrypt(file_content)
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=object_name,
-                Body=encrypted_content
-            )
-            return f"s3://{self.bucket_name}/{object_name}"
-        except ClientError as e:
-            # Add logging here
-            raise Exception(f"Failed to upload file to MinIO: {e}")
+    def _ensure_bucket(self) -> None:
+        """Create the default bucket if it doesn't exist."""
+        if self._client and not self._client.bucket_exists(settings.minio_bucket):
+            self._client.make_bucket(settings.minio_bucket)
+            logger.info(f"Created bucket: {settings.minio_bucket}")
 
-    def get_signed_url(self, object_name: str, expiration: int = 3600) -> str:
-        """Returns a presigned URL to download the file."""
-        try:
-            response = self.s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': self.bucket_name,
-                                                            'Key': object_name},
-                                                    ExpiresIn=expiration)
-            return response
-        except ClientError as e:
-            raise Exception(f"Failed to generate presigned URL: {e}")
+    @property
+    def client(self) -> Minio:
+        if self._client is None:
+            raise RuntimeError("ObjectStorage not connected. Call connect() first.")
+        return self._client
 
-    def delete_file(self, object_name: str) -> bool:
-        """Deletes a file from MinIO."""
-        try:
-            self.s3_client.delete_object(Bucket=self.bucket_name, Key=object_name)
-            return True
-        except ClientError as e:
-            raise Exception(f"Failed to delete file from MinIO: {e}")
+    def upload_file(
+        self,
+        object_name: str,
+        data: bytes,
+        content_type: str = "application/pdf",
+        bucket: str | None = None,
+    ) -> str:
+        """Upload a file and return the object path."""
+        bucket = bucket or settings.minio_bucket
+        self.client.put_object(
+            bucket_name=bucket,
+            object_name=object_name,
+            data=BytesIO(data),
+            length=len(data),
+            content_type=content_type,
+        )
+        return f"{bucket}/{object_name}"
 
-    def download_and_decrypt(self, object_name: str) -> bytes:
-        """Downloads a file and decrypts its contents."""
+    def download_file(self, object_name: str, bucket: str | None = None) -> bytes:
+        """Download a file and return its contents."""
+        bucket = bucket or settings.minio_bucket
+        response = self.client.get_object(bucket_name=bucket, object_name=object_name)
         try:
-            response = self.s3_client.get_object(Bucket=self.bucket_name, Key=object_name)
-            encrypted_data = response['Body'].read()
-            return self.cipher_suite.decrypt(encrypted_data)
-        except ClientError as e:
-            raise Exception(f"Failed to download or decrypt file: {e}")
+            return response.read()
+        finally:
+            response.close()
+            response.release_conn()
+
+    def delete_file(self, object_name: str, bucket: str | None = None) -> None:
+        """Delete a file from storage."""
+        bucket = bucket or settings.minio_bucket
+        self.client.remove_object(bucket_name=bucket, object_name=object_name)
+
+
+# Singleton
+storage = ObjectStorage()
