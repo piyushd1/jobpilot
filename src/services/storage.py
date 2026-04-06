@@ -75,5 +75,8 @@ class ObjectStorage:
         self.client.remove_object(bucket_name=bucket, object_name=object_name)
 
 
+# Alias for backward compatibility with Antigravity's code
+MinioStorage = ObjectStorage
+
 # Singleton
 storage = ObjectStorage()

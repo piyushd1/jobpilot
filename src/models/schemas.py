@@ -110,3 +110,18 @@ class ReasoningTrace(BaseModel):
     output_summary: str
     token_usage: dict[str, int] = Field(default_factory=dict)
     duration_seconds: float = 0.0
+
+
+class RawJobArtifact(BaseModel):
+    """Raw job data as fetched from a source, before deduplication."""
+
+    job_id: str = ""
+    source_platform: str = ""
+    title: str = ""
+    company: str = ""
+    description_raw: str = ""
+    application_url: str = ""
+    scraped_at: str = ""
+    location: str | None = None
+    salary_range: str | None = None
+    experience_range: str | None = None
