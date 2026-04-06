@@ -7,8 +7,10 @@ class OutreachDrafterAgent:
     draft highly personalized, context-aware networking messages in 5 templates.
     """
 
-    def __init__(self, model="gpt-4o"):
-        self.model = model
+    def __init__(self, model: str | None = None):
+        from src.config.settings import settings
+
+        self.model = model or settings.llm_primary_model
 
     def build_developer_prompt(self, contact, company, job_title):
         return f"""

@@ -35,13 +35,16 @@ class Settings(BaseSettings):
     minio_bucket: str = "jobpilot-resumes"
     minio_secure: bool = False
 
-    # LLM
+    # LLM — supports OpenAI, Anthropic, or OpenRouter (via LiteLLM)
+    # Set the provider you want to use. For OpenRouter, set OPENROUTER_API_KEY
+    # and prefix models with "openrouter/" (e.g., "openrouter/google/gemini-2.5-flash")
     openai_api_key: str = ""
     anthropic_api_key: str = ""
-    llm_primary_model: str = "gpt-4o"
-    llm_fast_model: str = "gpt-4o-mini"
-    llm_fallback_model: str = "claude-sonnet-4-20250514"
-    embedding_model: str = "text-embedding-3-small"
+    openrouter_api_key: str = ""
+    llm_primary_model: str = "openrouter/google/gemini-2.5-flash"
+    llm_fast_model: str = "openrouter/google/gemini-2.5-flash"
+    llm_fallback_model: str = "openrouter/anthropic/claude-sonnet-4"
+    embedding_model: str = "openrouter/openai/text-embedding-3-small"
 
     # Third-party APIs
     serpapi_key: str = ""

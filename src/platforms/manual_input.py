@@ -7,7 +7,10 @@ from src.models.schemas import RawJobArtifact
 
 
 class ManualInputService:
-    def __init__(self, model: str = "gpt-4o-mini"):
+    def __init__(self, model: str | None = None):
+        from src.config.settings import settings
+
+        model = model or settings.llm_fast_model
         self.model = model
 
     async def parse_urls(self, urls: list[str]) -> list[RawJobArtifact]:

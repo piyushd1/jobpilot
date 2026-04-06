@@ -1,11 +1,17 @@
 """Unified LLM gateway using LiteLLM for multi-provider support.
 
-Supports OpenAI GPT-4o, GPT-4o-mini, and Claude Sonnet with a unified
-interface. Tracks token usage per call.
+Supports OpenAI, Anthropic, and OpenRouter with a unified interface.
+LiteLLM routes to the correct provider based on model prefix:
+  - "openrouter/..." → OpenRouter API
+  - "gpt-..." → OpenAI
+  - "claude-..." → Anthropic
+
+Configure via .env: set OPENROUTER_API_KEY to use OpenRouter.
 """
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 import litellm
@@ -17,6 +23,14 @@ logger = get_logger(__name__)
 
 # Suppress LiteLLM's verbose logging
 litellm.suppress_debug_info = True
+
+# Configure API keys for LiteLLM based on what's available
+if settings.openrouter_api_key:
+    os.environ["OPENROUTER_API_KEY"] = settings.openrouter_api_key
+if settings.openai_api_key:
+    os.environ["OPENAI_API_KEY"] = settings.openai_api_key
+if settings.anthropic_api_key:
+    os.environ["ANTHROPIC_API_KEY"] = settings.anthropic_api_key
 
 
 class LLMGateway:

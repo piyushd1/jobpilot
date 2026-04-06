@@ -6,8 +6,10 @@ class ResearchAgent:
     Agent 3: Enriches company data (funding, size, ratings) via search.
     """
 
-    def __init__(self, model="gpt-4o-mini"):
-        self.model = model
+    def __init__(self, model: str | None = None):
+        from src.config.settings import settings
+
+        self.model = model or settings.llm_fast_model
 
     async def enrich_company(self, company_name: str) -> dict:
         """
